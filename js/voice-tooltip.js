@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>Merhaba ben Latte</span>
         </div>
         <div class="voice-tooltip-content">
-            <span>İşlemleriniz konuşarak da yapababilirsiniz.</span>
+            <span>İşlemlerinizi konuşarak da yapababilirsiniz.</span>
             <span>Simgeye tıklayın ya da CTRL+K sonrası konuşun.</span><br/>
             <span>Yapabileceğiniz işlemler:</span>
             <ul class="voice-commands-list">
