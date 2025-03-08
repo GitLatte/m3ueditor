@@ -14,8 +14,8 @@ function toggleTheme() {
 }
 
 // Varsayılan logo URL'sini değiştirelim
-const DEFAULT_LOGO = 'images/default-channel.png';  // Görüntüleme için
-const FALLBACK_LOGO = 'images/default-channel.png'; // Kaydetme için
+const DEFAULT_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png';  // Görüntüleme için
+const FALLBACK_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png'; // Kaydetme için
 
 // Hazır User Agent listesi
 const PREDEFINED_USER_AGENTS = {
@@ -1348,9 +1348,9 @@ window.findMatchingLogos = function(channelName) {
                     <div class="logo-grid">
                         ${matchingLogos.map(logo => `
                             <div class="logo-option">
-                                <img src="images/kanal-gorselleri/turkiye/${logo}" 
+                                <img src="https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}" 
                                      alt="${logo}"
-                                     onclick="selectLogo('images/kanal-gorselleri/turkiye/${logo}')"
+                                     onclick="selectLogo('https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}')"
                                      onerror="this.src='${DEFAULT_LOGO}'">
                             </div>
                         `).join('')}
