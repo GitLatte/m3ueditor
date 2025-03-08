@@ -4,6 +4,9 @@
 
 M3U Web Düzenleme Aracı, IPTV kanal listelerinizi kolayca yönetmenizi sağlayan modern ve kullanıcı dostu bir web uygulamasıdır. Sesli komutlar, koyu/açık tema desteği ve gelişmiş kanal yönetimi özellikleri ile M3U dosyalarınızı zahmetsizce düzenleyebilirsiniz.
 
+## Önemli
+- Mobil uyumlu olarak tasarlamadım. Buna dikkat edin lütfen.
+
 ## 🌟 Özellikler
 
 ### 📝 Temel Özellikler
