@@ -2,7 +2,7 @@
 const epgList = [
     {
         name: 'Türkiye EPG (Kanal Logoları) - Kendi hazırladığım kanal logoları için olan EPG listesi',
-        url: 'epg-listeleri/turkey.xml',
+        url: 'https://gitlatte.github.io/m3ueditor/epg-listeleri/turkey.xml',
         icon: 'fas fa-images'
     },
     {
