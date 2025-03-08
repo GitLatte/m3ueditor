@@ -1,0 +1,9 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="30" height="30">
+	<title>Yeni Proje</title>
+	<defs>
+		<image  width="100" height="100" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkAQMAAABKLAcXAAAAAXNSR0IB2cksfwAAAAZQTFRFAAAA2w4TPoYPTgAAAAJ0Uk5TAP9bkSK1AAABmklEQVR4nM3Uv2vCQBQH8DuNRHFIoHtP6OA/ISb+A+3fYmkppdAk0rnQvSD+CY4ZCo1TO0onh4IBBx2kDShV1KT33t0FLEKNdKhDzCfE+/HufaUEPmzoufBNUQmJzFT5NdloqfQFSXKp2JAQ/CHK6ppJYCs5DdvqVJQSSozQVIpzRJ8o0ZVG8vOiFNzBE6kpf2utpA/4eLet3fL5zPWelNHlsgKlJl8jC/9Wn8tSLNafTZG6ZNRh89XecJTZk51VOIqWXYfOh9Ud/a56HzX29xB2wYvQ8QQ75PXaBbExds9Dc5dG2HVHQsbFJXTkSYj1NM5voFurQrpfh04+7QkNmOey/n0LlX9vQwIe74SmZ34pDmoain5VeXJaV0WhVZmnqjAXInGBJ64M8QA5Hk8j61eErEZ76LU7thCDG6vhynOHfCWqC/SIr3qTUzla8XXOVY5oHNiWrxJHHKe0CNOkbmd6O+80Jstiqh//GgaJyH8U3wIRm6Bye2KDWM9nUCDr6eBuQlnrBEeI5DnEMICuTmWBxfswd725n74BG5sMdBUijaQAAAAASUVORK5CYII="/>
+	</defs>
+	<style>
+	</style>
+	<use id="Background" href="#img1" x="0" y="0"/>
+</svg>

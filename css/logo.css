@@ -1,0 +1,18 @@
+/* Logo Animation Styles */
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.logo img {
+    object-fit: contain;
+    animation: logoFloat 6s ease-in-out infinite;
+    width: 175px;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}

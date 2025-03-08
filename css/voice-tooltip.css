@@ -1,0 +1,101 @@
+.voice-tooltip {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 300px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+}
+
+.btn-voice-command:not(.listening):hover .voice-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.voice-tooltip-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 1.1em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.voice-tooltip-header img {
+    width: 28px;
+    height: 28px;
+    filter: var(--icon-filter);
+}
+
+.voice-tooltip-content {
+    color: var(--text-muted);
+    font-size: 0.95em;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.voice-commands-list {
+    margin-top: 12px;
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.voice-commands-list li {
+    color: var(--text-color);
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    background: var(--hover-color);
+    font-size: 0.9em;
+}
+
+.voice-commands-list li:hover {
+    opacity: 1;
+    color: var(--primary);
+    background: var(--hover-color-active);
+    transform: translateX(4px);
+}
+
+.voice-commands-list li i {
+    color: var(--primary);
+    font-size: 1em;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.voice-tooltip-content span {
+    text-align: left;
+    display: flex;
+    align-items: left;
+}
+
+.voice-commands-list li title {
+    color: #a31313 !important;
+    font-size: 1em;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

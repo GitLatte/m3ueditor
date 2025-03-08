@@ -1,0 +1,134 @@
+.tutorial-modal .modal-content {
+    max-width: 800px;
+    width: 90%;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-modal .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorial-modal .modal-body {
+    padding: 30px;
+}
+
+.tutorial-content-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.tutorial-mascot {
+    width: 175px;
+    height: auto;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.tutorial-text {
+    flex: 1;
+}
+
+.tutorial-text p {
+    color: var(--text-color);
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.tutorial-text pre {
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 15px 0;
+    font-family: monospace;
+}
+
+.tutorial-text ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.tutorial-text li {
+    margin: 10px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+.tutorial-text li:before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+}
+
+.tutorial-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.tutorial-progress {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+    background: var(--primary);
+    transform: scale(1.2);
+}
+
+button.prev-btn,
+button.next-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button.show-example-btn {
+    padding: 8px 16px;
+    margin-left: 40%;
+    border: none;
+    border-radius: 6px;
+    background: #0ca025;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+button.show-example-btn:hover {
+    border-radius: 6px;
+    background: #066816;
+    transition: background 0.9s ease;
+}
+
+button.prev-btn:disabled {
+    background: var(--border-color);
+    cursor: not-allowed;
+}
+
+button.prev-btn:hover:not(:disabled),
+button.next-btn:hover {
+    background: var(--primary-hover);
+}

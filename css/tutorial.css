@@ -1,0 +1,151 @@
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+    display: none;
+}
+
+.tutorial-box {
+    position: fixed;
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    max-width: 600px;
+    color: #fff;
+    display: none;
+    animation: tutorialFadeIn 0.3s ease-out;
+}
+
+.tutorial-box.active {
+    display: block;
+}
+
+.tutorial-content {
+    margin-bottom: 20px;
+}
+
+.tutorial-content-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.tutorial-mascot {
+    width: 150px;
+    height: auto;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.tutorial-text {
+    flex: 1;
+}
+
+.tutorial-content h3 {
+    margin: 0 0 10px 0;
+    color: #4d9bd6;
+    font-size: 1.2em;
+}
+
+.tutorial-box .tutorial-content p {
+    color: #fff;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.tutorial-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.tutorial-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.tutorial-btn.next {
+    background-color: #4d9bd6;
+    color: white;
+}
+
+.tutorial-btn.prev {
+    background-color: transparent;
+    color: #4d9bd6;
+    border: 1px solid #4d9bd6;
+}
+
+.tutorial-btn:hover {
+    opacity: 0.9;
+}
+
+.tutorial-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.tutorial-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+    transition: background-color 0.3s;
+}
+
+.tutorial-dot.active {
+    background: #4d9bd6;
+}
+
+.tutorial-highlight {
+    position: relative;
+    z-index: 10000;
+    box-shadow: 0 0 0 4px #4d9bd6;
+    border-radius: 4px;
+    pointer-events: all !important;
+}
+
+@keyframes tutorialFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tutorial-skip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.tutorial-skip:hover {
+    color: #fff;
+}
+
+.tutorial-image {
+    max-width: 100%;
+    border-radius: 4px;
+    margin: 10px 0;
+    border: 1px solid #444;
+}

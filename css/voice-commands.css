@@ -1,0 +1,131 @@
+.search-voice-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 5px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sesli-arama-simgesi {
+    width: 22px;
+    height: 22px;
+    transition: all 0.3s ease;
+}
+
+.search-voice-btn:hover {
+    color: var(--primary) !important;
+}
+
+.search-voice-btn.listening {
+    background: none;
+}
+
+
+.btn-voice-command {
+    position: relative;
+    padding: 8px;
+    border-radius: 50%;
+    border: none;
+    background: url('../sesli-asistan.svg') no-repeat center;
+    background-size: 24px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-voice-command:hover {
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+}
+
+.btn-voice-command.listening {
+    background: linear-gradient(98.3deg, rgb(0, 0, 0) 10.6%, rgb(255, 0, 0) 97.7%);
+    transition: all .2s ease-in-out !important;
+    transform: scale(1.4) !important;
+}
+
+.voice-feedback {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 1001;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    animation: pulse 2s infinite;
+    width: auto;
+    min-width: 200px;
+    max-width: 80%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: visible;
+    height: auto;
+    min-height: 40px;
+}
+
+.voice-listening-feedback {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 1001;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    animation: pulse 2s infinite;
+    width: auto;
+    min-width: 200px;
+    max-width: 80%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: visible;
+    height: auto;
+    min-height: 40px;
+}
+
+.voice-listening-feedback.fade-out {
+    opacity: 0;
+}
+
+@keyframes pulse {
+    0% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 100;
+    }
+}
+
+.voice-feedback.fade-out {
+    opacity: 0;
+}

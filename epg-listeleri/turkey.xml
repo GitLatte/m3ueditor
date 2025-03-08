@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv SYSTEM "xmltv.dtd">
+<tv generator-info-name="M3U Web Designer EPG Generator" generator-info-url="https://github.com/gitlatte/m3uwebdesign">
+  <!-- Channel definitions -->
+  <channel id="trt1.tr">
+    <display-name lang="tr">TRT 1</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-1-tr.png"/>
+  </channel>
+  <channel id="trt2.tr">
+    <display-name lang="tr">TRT 2</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-2-tr.png"/>
+  </channel>
+  <channel id="trt3.tr">
+    <display-name lang="tr">TRT 3</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-3-tr.png"/>
+  </channel>
+  <channel id="trtspor.tr">
+    <display-name lang="tr">TRT Spor</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-spor-tr.png"/>
+  </channel>
+  <channel id="trtbelgesel.tr">
+    <display-name lang="tr">TRT Belgesel</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-belgesel-tr.png"/>
+  </channel>
+  <channel id="trtcocuk.tr">
+    <display-name lang="tr">TRT Çocuk</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-cocuk-tr.png"/>
+  </channel>
+  <channel id="trthaber.tr">
+    <display-name lang="tr">TRT Haber</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-haber-tr.png"/>
+  </channel>
+  <channel id="trtmuzik.tr">
+    <display-name lang="tr">TRT Müzik</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-muzik-tr.png"/>
+  </channel>
+  <channel id="trtavaz.tr">
+    <display-name lang="tr">TRT Avaz</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-avaz-tr.png"/>
+  </channel>
+  <channel id="trtkurdi.tr">
+    <display-name lang="tr">TRT Kurdi</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-kurdi-tr.png"/>
+  </channel>
+  <channel id="trtworld.tr">
+    <display-name lang="tr">TRT World</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-world-tr.png"/>
+  </channel>
+  <channel id="atv.tr">
+    <display-name lang="tr">ATV</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/atv-tr.png"/>
+  </channel>
+  <channel id="kanald.tr">
+    <display-name lang="tr">Kanal D</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/kanal-d-tr.png"/>
+  </channel>
+  <channel id="startv.tr">
+    <display-name lang="tr">Star TV</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/star-tv-tr.png"/>
+  </channel>
+  <channel id="showtv.tr">
+    <display-name lang="tr">Show TV</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/show-tr.png"/>
+  </channel>
+  <channel id="fox.tr">
+    <display-name lang="tr">Fox TV</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/fox-tr.png"/>
+  </channel>
+  <channel id="tv8.tr">
+    <display-name lang="tr">TV8</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/tv8-tr.png"/>
+  </channel>
+  <channel id="cnnturk.tr">
+    <display-name lang="tr">CNN Türk</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/cnn-turk-tr.png"/>
+  </channel>
+  <channel id="ntv.tr">
+    <display-name lang="tr">NTV</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/ntv-tr.png"/>
+  </channel>
+  <channel id="haberturk.tr">
+    <display-name lang="tr">Habertürk</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/haberturk-tr.png"/>
+  </channel>
+  <channel id="trt1hd.tr">
+    <display-name lang="tr">TRT 1 HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-1-tr.png"/>
+  </channel>
+  <channel id="trt2hd.tr">
+    <display-name lang="tr">TRT 2 HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-2-tr.png"/>
+  </channel>
+  <channel id="trtspor.hd.tr">
+    <display-name lang="tr">TRT Spor HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-spor-tr.png"/>
+  </channel>
+  <channel id="trtbelgesel.hd.tr">
+    <display-name lang="tr">TRT Belgesel HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-belgesel-tr.png"/>
+  </channel>
+  <channel id="trthaber.hd.tr">
+    <display-name lang="tr">TRT Haber HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/trt-haber-tr.png"/>
+  </channel>
+  <channel id="atv.hd.tr">
+    <display-name lang="tr">ATV HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/atv-tr.png"/>
+  </channel>
+  <channel id="kanald.hd.tr">
+    <display-name lang="tr">Kanal D HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/kanal-d-tr.png"/>
+  </channel>
+  <channel id="startv.hd.tr">
+    <display-name lang="tr">Star TV HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/star-tv-tr.png"/>
+  </channel>
+  <channel id="showtv.hd.tr">
+    <display-name lang="tr">Show TV HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/show-tr.png"/>
+  </channel>
+  <channel id="fox.hd.tr">
+    <display-name lang="tr">Fox TV HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/fox-tr.png"/>
+  </channel>
+  <channel id="tv8.hd.tr">
+    <display-name lang="tr">TV8 HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/tv8-tr.png"/>
+  </channel>
+  <channel id="cnnturk.hd.tr">
+    <display-name lang="tr">CNN Türk HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/cnn-turk-tr.png"/>
+  </channel>
+  <channel id="ntv.hd.tr">
+    <display-name lang="tr">NTV HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/ntv-tr.png"/>
+  </channel>
+  <channel id="haberturk.hd.tr">
+    <display-name lang="tr">Habertürk HD</display-name>
+    <icon src="../images/kanal-gorselleri/turkiye/haberturk-tr.png"/>
+  </channel>
+</tv>

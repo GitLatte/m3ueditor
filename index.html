@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tutorial.css">
+    <link rel="stylesheet" href="css/logo.css">
+    <link rel="stylesheet" href="css/editor-tutorial.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/voice-tooltip.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js"></script>
+    <style>:root { --primary-rgb: 77, 155, 214; }</style>
+    <link rel="stylesheet" href="css/voice-commands.css">
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+    <title>M3U Web Designer</title>
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sol Menü -->
+        <aside class="sidebar">
+            <div class="logo">
+                <a href="index.html"><img src="images/logo.png" alt="M3U Düzenleyici - Latte"></a>
+            </div>
+            
+            <div class="menu-section">
+                <h3 class="fa-lt1"><i class="fa fa-menu"></i> Genel</h3>
+                <ul>
+                    <li class="">
+                        <a href="index.html"><i class="fa-solid fa-rotate"></i> Sayfayı Yenile</a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="startTutorial(); return false;">
+                            <i class="fa-solid fa-chalkboard-user"></i> Siteyi Nasıl Kullanırım?</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="menu-section">
+                <hr>
+                <h3 class="fa-lt1"><i class="fa fa-crown"></i> SPECIAL ONE</h3>
+                <ul>
+                <li>
+                    <a href="javascript:void(0)" onclick="patr0nListeleri(); return false;">
+                        <i class="fa-solid fa-bolt"></i> patr0n M3u Listeleri
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="openPatronApps(); return false;">
+                        <i class="fa-solid fa-rocket"></i> patr0n Uygulamaları
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="openForumPosts(); return false;">
+                        <i class="fa-solid fa-comments"></i> Forumdan Paylaşımlar
+                    </a>
+                </li>
+                </ul>
+                <hr>
+                <h3 class="fa-lt1"><i class="fa fa-tools"></i> Latte'nin Araçları</h3>
+                <ul>
+                    <li>
+                        <a href="javascript:void(0)" onclick="patr0nLinkTest(); return false;">
+                            <i class="fa-solid fa-skull-crossbones"></i> M3u/M3u8 Sunucu Kontrolü
+                        </a>
+                    </li>
+                    <li class="submenu-parent">
+                        <a href="javascript:void(0)" onclick="toggleVideoSubmenu(event); return false;">
+                            <i class="fas fa-video"></i> &nbsp;Video URL Test
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li>
+                                <a href="javascript:void(0)" onclick="openVideoUrlTest(); return false;">
+                                    <i class="fas fa-play-circle"></i> Dahili Oynatıcı
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)" onclick="openVideoUrlProxy(); return false;">
+                                    <i class="fas fa-globe"></i> Proxy Oynatıcı
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="patr0nHazirListeler(); return false;">
+                            <i class="fa-regular fa-rectangle-list"></i> Hazır Listeler
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="showEpgList(); return false;">
+                            <i class="fas fa-tv"></i> EPG Listeleri
+                        </a>
+                    </li>
+                    <li>
+                    <a href="javascript:void(0)" onclick="patr0nLinkleriTopla(); return false;">
+                        <i class="fa fa-file"></i> Metin/Text/URL Linkleri Ayıklama</a>
+                    </a>
+                </li>
+
+                </ul>
+                <div class="footer">
+                    <a href="javascript:void(0)" onclick="anaKonuyaGit(); return false;">
+                        <i class="fa-solid fa-id-card fa-sm"></i> M3u Düzenleyici® Latte </a>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Ana İçerik -->
+        <main class="main-content">
+            <div class="top-actions">
+                <button class="btn-voice-command" data-action="notifications">
+                    <img src="images/sesli-asistan.svg" alt="Sesli arama" style="width: 22px; height: 30px;">
+                </button>
+                <button class="btn-notification" data-action="notifications">
+                    <i class="fas fa-bell fa-xl"></i>
+                    <span class="badge">0</span>
+                </button>
+                <button class="btn-theme" data-action="theme">
+                    <span class="gunesli-gunler" title="Tema Değiştir"></span>
+                </button>
+            </div>
+            <!-- Quick Actions -->
+            <section class="quick-actions">
+                <div class="action-grid">
+                    <div class="action-card load-options">
+                        <div class="load-button" data-action="loadFile">
+                            <i class="fas fa-file-import"></i>
+                            <span>Dosya'dan Yükle</span>
+                        </div>
+                        <div class="load-button" data-action="loadUrl">
+                            <i class="fas fa-link"></i>
+                            <span>URL ile Yükle</span>
+                        </div>
+                    </div>
+                    <div class="action-card yeni-olustur" data-action="new">
+                        <i class="fas fa-plus"></i>
+                        <span>Liste Oluştur</span>
+                    </div>
+                    <div class="action-card" data-action="edit">
+                        <i class="fas fa-code"></i>
+                        <span>Metin Editörü</span>
+                    </div>
+                    <div class="action-card" data-action="save">
+                        <i class="fas fa-save"></i>
+                        <span>Kaydet</span>
+                    </div>
+                    <div class="action-card btn-favorites">
+                        <i class="fas fa-heart"></i>
+                        <span>Favoriler</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kanal Listesi -->
+            <section class="channel-list">
+                <div class="section-header">
+                    <div class="list-actions">
+                        <div class="filter-container" style="display: none;">
+                            <select id="groupFilter">
+                                <option value="">Gruba Göre Filtrele</option>
+                                <option value="all">Tüm Gruplar</option>
+                            </select>
+                            <select id="sortFilter">
+                                <option value="default">Varsayılan Sıralama</option>
+                                <option value="favorites">Favoriler</option>
+                                <option value="az">Alfabetik A'dan Z'ye</option>
+                                <option value="za">Alfabetik Z'den A'ya</option>
+                                <option value="logo">Logosuzlar Üstte</option>
+                            </select>
+                        </div>
+                        <div class="search-bar" style="display: none;">
+                            <i class="fas fa-search"></i>
+                            <input id="aramazsanaramayar" type="text" placeholder="Kanal ara...">
+                        </div>
+                        <button data-action="add" class="btn-add" style="display: none;">
+                            <i class="fas fa-plus"></i>
+                            Yeni Kanal Ekle
+                        </button>
+                    </div>
+                    <div class="section-buttons">
+                        <h2><i class="fas fa-tv"></i> Kanallar</h2>
+                        <h2 id="groupHeader"><i class="fas fa-folder"></i> Kanal Grupları</h2>
+                        <h2 onclick="showStatistics()"><i class="fas fa-chart-bar"></i> İstatistikler</h2>
+                    </div>
+                </div>
+                <div id="groupList" class="group-grid" style="display: none;"></div>
+                
+                <!-- Boş durum mesajı -->
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-state-content">
+                        <h2>M3U Düzenleyici'ye Hoş Geldiniz</h2>
+                        <p class="intro-text">M3U Düzenleyici, IPTV listelerinizi profesyonel bir şekilde yönetmenizi sağlayan kapsamlı bir araçtır. Kullanıcı dostu arayüzü ve gelişmiş özellikleriyle, IPTV deneyiminizi en üst seviyeye çıkarın.</p>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <i class="fas fa-file-import"></i>
+                                <div class="feature-text">
+                                    <h3>Akıllı Liste Yönetimi</h3>
+                                    <p>Yerel dosyalardan veya URL üzerinden M3U listelerinizi kolayca içe aktarın. Gelişmiş filtreleme ve sıralama özellikleriyle listelerinizi düzenleyin. Kanal gruplarını özelleştirin ve favori kanallarınızı belirleyin.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-list"></i>
+                                <div class="feature-text">
+                                    <h3>Profesyonel Düzenleme Araçları</h3>
+                                    <p>Kanal kartları üzerindeki ok işaretleriyle kanalları yeniden sıralayın. Kanal bilgilerini tek tıkla düzenleyin. Grup yönetimi ile kanallarınızı kategorize edin. Otomatik logo eşleştirme özelliği ile görsel zenginlik katın.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-play-circle"></i>
+                                <div class="feature-text">
+                                    <h3>Gelişmiş Test ve Doğrulama</h3>
+                                    <p>Dahili oynatıcı ile kanalları anında test edin. Proxy desteği ile erişim sorunlarını çözün. Bozuk linkleri otomatik tespit edin. Kanal kalitesini ve yayın durumunu gerçek zamanlı kontrol edin.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-tools"></i>
+                                <div class="feature-text">
+                                    <h3>Özelleştirilebilir Deneyim</h3>
+                                    <p>Hazır Liste ile hızlı başlangıç yapın. EPG desteği ile program rehberini listenize entegre edin. Koyu/açık tema seçeneği ile göz yorgunluğunu azaltın. Favori kanallarınızı kaydedin ve istediğiniz zaman kullanın.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-hints">
+                            <h3>Başlamak İçin Önerilen Adımlar:</h3>
+                            <ul>
+                                <li><i class="fas fa-file-import"></i> Mevcut bir M3U listesini içe aktararak düzenlemeye başlayın.</li>
+                                <li><i class="fas fa-plus"></i> Yeni bir liste oluşturarak kendi IPTV koleksiyonunuzu oluşturun.</li>
+                                <li><i class="fas fa-code"></i> Gelişmiş metin editörü ile manuel düzenlemeler yapın.</li>
+                                <li><i class="fas fa-graduation-cap"></i> Etkileşimli öğretici ile tüm özellikleri keşfedin.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Arama sonucu bulunamazsa burada görünsün -->
+                <div id="noResultsState" class="no-results-state">
+                    <h3><i class="fas fa-search"></i> Sonuç Bulunamadı</h3>
+                    <p>Arama kriterlerinize uygun kanal veya grup bulunamadı.</p>
+                    <div class="search-suggestions">
+                        <h4>Öneriler:</h4>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Yazım hatası olup olmadığını kontrol edin</li>
+                            <li><i class="fas fa-check"></i> Daha az veya farklı arama terimi deneyin</li>
+                            <li><i class="fas fa-check"></i> Kanal adı veya grup adıyla arama yapmayı deneyin</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="channelList" class="channel-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <input type="file" id="fileInput" accept=".m3u" style="display: none;">
+    <div id="loading" class="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    <script src="js/no-results.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/tutorial.js"></script>
+    <script src="js/editor-tutorial.js"></script>
+    <script src="js/epg.js"></script>
+    <script src="js/online-status.js"></script>
+    <script src="js/voice-commands.js"></script>
+    <script src="js/voice-tooltip.js"></script>
+    <script src="js/patron-apps.js"></script>
+    <script src="js/forum-posts.js"></script>
+    <!-- Öğretici görünümü -->
+    <div class="tutorial-overlay"></div>
+    <div class="tutorial-box">
+        <button class="tutorial-skip">Geç</button>
+        <div class="tutorial-content"></div>
+        <div class="tutorial-navigation">
+            <button class="tutorial-btn prev">Önceki</button>
+            <button class="tutorial-btn next">Sonraki</button>
+        </div>
+        <div class="tutorial-progress"></div>
+    </div>
+</body>
+</html>
