@@ -1,5 +1,7 @@
 # M3U Editör by Latte
 
+<img src="https://raw.githubusercontent.com/GitLatte/m3ueditor/refs/heads/site/images/tanitim/koyu-tema-full-site.png"></img>
+
 ## 📺 Genel Bakış
 
 M3U Web Düzenleme Aracı, IPTV kanal listelerinizi kolayca yönetmenizi sağlayan modern ve kullanıcı dostu bir web uygulamasıdır. Sesli komutlar, koyu/açık tema desteği ve gelişmiş kanal yönetimi özellikleri ile M3U dosyalarınızı zahmetsizce düzenleyebilirsiniz.
