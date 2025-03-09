@@ -14,8 +14,8 @@ function toggleTheme() {
 }
 
 // Varsayılan logo URL'sini değiştirelim
-const DEFAULT_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png';  // Görüntüleme için
-const FALLBACK_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png'; // Kaydetme için
+const DEFAULT_LOGO = 'images/default-channel.png';  // Görüntüleme için
+const FALLBACK_LOGO = 'images/default-channel.png'; // Kaydetme için
 
 // Hazır User Agent listesi
 const PREDEFINED_USER_AGENTS = {
@@ -150,13 +150,16 @@ let currentPage = 0;
 let totalPages = 0;
 let currentChannels = [];
 
-function updateChannelList(filteredChannels = null, page = 0) {
+function updateChannelList(filteredChannels = null, page = null) {
     const channelList = document.getElementById('channelList');
     const groupList = document.getElementById('groupList');
     const emptyState = document.getElementById('emptyState');
     const sortFilter = document.getElementById('sortFilter');
     const groupFilter = document.getElementById('groupFilter');
     const paginationContainer = document.getElementById('channelPagination');
+
+    // Use current page if no specific page is provided
+    const targetPage = page !== null ? page : currentPage;
 
     // Reset both group and channel list displays
     if (groupList) {
@@ -194,7 +197,7 @@ function updateChannelList(filteredChannels = null, page = 0) {
     
     // Update pagination state
     totalPages = Math.ceil(currentChannels.length / CHANNELS_PER_PAGE);
-    currentPage = Math.min(page, Math.max(0, totalPages - 1));
+    currentPage = Math.min(targetPage, Math.max(0, totalPages - 1));
 
     if (currentChannels.length > 0) {
         emptyState.style.display = 'none';
@@ -1348,9 +1351,9 @@ window.findMatchingLogos = function(channelName) {
                     <div class="logo-grid">
                         ${matchingLogos.map(logo => `
                             <div class="logo-option">
-                                <img src="https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}" 
+                                <img src="images/kanal-gorselleri/turkiye/${logo}" 
                                      alt="${logo}"
-                                     onclick="selectLogo('https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}')"
+                                     onclick="selectLogo('images/kanal-gorselleri/turkiye/${logo}')"
                                      onerror="this.src='${DEFAULT_LOGO}'">
                             </div>
                         `).join('')}
@@ -4044,7 +4047,8 @@ function toggleFavorite(channelIdentifier, event) {
         addNotification('Favori Kanal Ekleme', `${channel.tvgName} favorilere eklendi.`);
     }
     
-    updateChannelList();
+    // Update the channel list while maintaining current page and filters
+    updateChannelList(currentChannels, currentPage);
     
     // Eğer favori modalı açıksa, onu güncelle
     if (currentFavoriteModal) {
