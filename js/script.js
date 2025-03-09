@@ -2301,22 +2301,28 @@ function showTextEditor(content) {
                         {
                             label: '#EXTINF:-1 (Boş değerlerle kanal ekle)',
                             kind: monaco.languages.CompletionItemKind.Snippet,
-                            insertText: '#EXTINF:-1 tvg-name="" tvg-id="" tvg-logo="" group-title="" ,Kanal-Adı-Buraya\nİÇERİĞE-AİT-URL-ADRESİ-BURAYA\n',
+                            insertText: 'EXTINF:-1 tvg-name="" tvg-id="" tvg-logo="" group-title="" ,Kanal-Adı-Buraya\nİÇERİĞE-AİT-URL-ADRESİ-BURAYA\n',
                             documentation: 'Kanal bilgisi ve URL ekler',
                             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
                         },
                         {
                             label: '#EXTVLCOPT:http-referrer (URL Referansı)',
                             kind: monaco.languages.CompletionItemKind.Snippet,
-                            insertText: '#EXTVLCOPT:http-referrer=',
+                            insertText: '#XTVLCOPT:http-referrer=',
                             documentation: 'Bazı url adresleri referans gerektirir.',
                         },
                         
                         {
                             label: '#EXTVLCOPT:http-user-agent (URL User-Agent)',
                             kind: monaco.languages.CompletionItemKind.Snippet,
-                            insertText: '#EXTVLCOPT:http-user-agent=',
+                            insertText: 'EXTVLCOPT:http-user-agent=',
                             documentation: 'Bazı url adreslerleri user-agent gerektirir.',
+                        },
+                        {
+                            label: '#EXTVLCOPT:http-... (HTTP Header referansları)',
+                            kind: monaco.languages.CompletionItemKind.Snippet,
+                            insertText: 'EXTVLCOPT:http-',
+                            documentation: 'Bazı adresler ek http header gereksinimleri taşır.',
                         },
                         {
                             label: 'tvg-id (EPG için kullanışlı)',
