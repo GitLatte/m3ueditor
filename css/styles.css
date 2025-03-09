@@ -256,6 +256,7 @@ body.dark-theme {
     cursor: pointer;
     transition: all 0.2s ease;
     min-height: 80px;
+    border: 1px solid #bdd1e0;
 }
 
 .dark-theme .action-card {
@@ -267,6 +268,7 @@ body.dark-theme {
     transform: translateY(-2px);
     background: var(--light-hover);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
 }
 
 .dark-theme .action-card:hover {
@@ -290,6 +292,7 @@ body.dark-theme {
     background: var(--light-sidebar);
     border-radius: 8px;
     padding: 20px;
+    border: 1px solid #bdd1e0;
 }
 
 /* Sayfalama stilleri */
@@ -340,6 +343,7 @@ body.dark-theme {
 
 .dark-theme .channel-list {
     background: var(--dark-sidebar);
+    border: none;
 }
 
 /* Section header için stil ayarları */
@@ -406,14 +410,23 @@ body.dark-theme {
 
 .btn-add {
     padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    background: var(--primary);
-    color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 5px;
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+    color: var(--primary);
+    transition: all 0.3sease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-add:hover {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 0 20px var(--primary);
 }
 
 .channel-grid {
@@ -641,18 +654,6 @@ body.dark-theme {
 .channel-actions {
     display: flex;
     gap: 10px;
-}
-
-.btn-add {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    background: var(--primary);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
 }
 
 .channel-actions button {
@@ -1193,7 +1194,13 @@ body.dark-theme {
     margin: 0;
 }
 
+.dark-theme .channel-modal .modal-body {
+    background: var(--bg-color);
+    padding: 20px;
+}
+
 .channel-modal .modal-body {
+    background-color: #f5f5f5;
     padding: 20px;
 }
 
@@ -1206,12 +1213,24 @@ body.dark-theme {
     align-items: center;
     gap: 8px;
     margin-bottom: 8px;
-    color: var(--dark-text);
+    color: #444446;
     font-weight: 500;
 }
 
 .form-group label i {
-    color: var(--primary);
+    cursor: help;
+}
+
+.dark-theme .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--dark-text);
+    font-weight: 500;
+}
+
+.dark-theme .form-group label i {
     cursor: help;
 }
 
@@ -1222,7 +1241,7 @@ body.dark-theme {
     border: 1px solid var(--dark-border);
     border-radius: 6px;
     background: var(--dark-sidebar);
-    color: var(--dark-text);
+    color: #c5bebe;
     font-size: 1em;
 }
 
@@ -1278,21 +1297,32 @@ body.dark-theme {
 
 /* URL Test Butonu */
 .btn-test {
-    margin-top: 8px;
-    padding: 8px 16px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9em;
+    margin-top: 8px !important;
+    padding: 4px 10px !important;
+    background-color: transparent !important;
+    border: 2px solid hsl(357.77deg 100% 57.84%) !important;
+    box-shadow: 0 0 4px hsl(357.77deg 100% 57.84%) !important;
+    color:  hsl(357.77deg 100% 57.84%) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 0.9em !important;
 }
 
 .btn-test:hover {
-    background: var(--primary-dark);
+    background-color: hsl(357.77deg 100% 57.84%) !important;
+    color: white !important;
+    box-shadow: 0 0 8px hsl(357.77deg 100% 57.84%) !important;
+    text-shadow: 0 0 10px currentColor !important;
+}
+
+.btn-test i {
+    cursor: pointer !important;
 }
 
 /* Modal Footer */
@@ -1316,8 +1346,8 @@ body.dark-theme {
 }
 
 .btn-save {
-    background: var(--primary);
-    color: white;
+    background: #009688;
+    color: #ffffff;
 }
 
 .btn-cancel {
@@ -1325,12 +1355,26 @@ body.dark-theme {
     color: var(--dark-text);
 }
 
+.dark-theme .btn-save {
+    background: #009688;
+    color: #ffffff;
+}
+
+.dark-theme .btn-save:hover {
+    background: #043833;
+    color: #ffffff;
+}
+
+.dark-theme .btn-cancel:hover {
+    background: var(--danger);
+}
+
 .btn-save:hover {
-    background: var(--primary-dark);
+    background: #043833;
 }
 
 .btn-cancel:hover {
-    background: var(--dark-hover);
+    background: var(--danger);
 }
 
 .user-agent-container {
@@ -1359,10 +1403,10 @@ body.dark-theme {
 .btn-extras {
     width: 100%;
     padding: 10px;
-    background: var(--dark-sidebar);
-    border: 1px solid var(--dark-border);
+    background: #3d5663;
+    border: 1px solid #425e6d;
     border-radius: 6px;
-    color: var(--dark-text);
+    color: #cccccc;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1379,12 +1423,20 @@ body.dark-theme {
     transition: transform 0.2s;
 }
 
-.extras-content {
+.dark-theme .extras-content {
     margin-top: 10px;
     padding: 10px;
     border: 1px solid var(--dark-border);
     border-radius: 6px;
     background: var(--dark-sidebar);
+}
+
+.extras-content {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--dark-border);
+    border-radius: 6px;
+    background: #e4dede;
 }
 
 .extras-content.hidden {
@@ -2143,6 +2195,21 @@ label {
     background: var(--bg-secondary);
     width: 100%;
     text-align: left;
+    border: 1px solid #ddd;
+}
+
+.dark-theme .load-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: none !important;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--bg-secondary);
+    width: 100%;
+    text-align: left;
 }
 
 .load-button:hover {
@@ -2883,7 +2950,7 @@ select#sortFilter option[value="favorites"] {
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
-    background: var(--primary);
+    background: #009688;
     color: white;
     cursor: pointer;
 }
@@ -3412,4 +3479,66 @@ select#sortFilter option[value="favorites"] {
 
 .epglist:title {
     color: #770f0f !important;
-  }
+}
+
+/* HTTP Headers Styles */
+.http-headers-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.header-pair {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.header-pair input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.btn-remove-header {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-remove-header:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-add-header {
+    background: #466983;
+    color: white;
+    border: none;
+    padding: 4px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    transition: background 0.2s ease;
+}
+
+.btn-add-header:hover {
+    background: #2a4253;
+}
+
+.dark-theme .header-pair input {
+    background: var(--dark-sidebar);
+    border-color: var(--dark-border);
+    color: var(--dark-text);
+}

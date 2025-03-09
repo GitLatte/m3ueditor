@@ -105,6 +105,9 @@ function createChannelCard(channel, index, filteredChannels = null) {
     const isFavorite = localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null;
     const favoriteIconClass = isFavorite ? 'fas fa-heart' : 'far fa-heart';
 
+    // Custom headers göstergesi
+    const hasCustomHeaders = channel.customHeaders && Object.keys(channel.customHeaders).length > 0;
+
     return `
         <div class="channel-card" data-id="${index}">
             <span class="order-number">${index + 1}</span>
@@ -861,6 +864,7 @@ function parseM3U(content) {
         let httpReferrer = '';
         let userAgent = '';
         let epgUrl = '';
+        let customHeaders = {};
         updateControlsVisibility();
 
         // Extract EPG URL if present
@@ -885,7 +889,8 @@ function parseM3U(content) {
                     groupTitle: '',
                     channelUrl: '',
                     httpReferrer: '',
-                    userAgent: ''
+                    userAgent: '',
+                    customHeaders: {}
                 };
 
                 // EXTINF bilgilerini parse et
@@ -913,14 +918,22 @@ function parseM3U(content) {
             } else if (line.startsWith('#EXTVLCOPT:http-user-agent=')) {
                 userAgent = line.replace('#EXTVLCOPT:http-user-agent=', '');
                 if (currentChannel) currentChannel.userAgent = userAgent;
+            } else if (line.startsWith('#EXTVLCOPT:http-custom-header=')) {
+                const headerPart = line.replace('#EXTVLCOPT:http-custom-header=', '');
+                const [name, value] = headerPart.split('=');
+                if (currentChannel && name && value) {
+                    currentChannel.customHeaders[name] = value;
+                }
             } else if (line && currentChannel && !line.startsWith('#')) {
                 currentChannel.channelUrl = line;
                 currentChannel.httpReferrer = httpReferrer;
                 currentChannel.userAgent = userAgent;
-                newChannels.push({...currentChannel});
+                // Ensure customHeaders are properly copied before resetting
+                newChannels.push({...currentChannel, customHeaders: {...currentChannel.customHeaders}});
                 currentChannel = null;
                 httpReferrer = '';
                 userAgent = '';
+                customHeaders = {};
             }
         });
 
@@ -1037,6 +1050,11 @@ function generateM3UContent() {
         if (channel.userAgent) {
             content += `#EXTVLCOPT:http-user-agent=${channel.userAgent}\n`;
         }
+        if (channel.customHeaders) {
+            for (const [name, value] of Object.entries(channel.customHeaders)) {
+                content += `#EXTVLCOPT:http-custom-header=${name}=${value}\n`;
+            }
+        }
         
         content += `${channel.channelUrl}\n`;
         return content;
@@ -1063,6 +1081,14 @@ function showChannelModal(channel = null) {
     modal.className = 'modal channel-modal';
     updateControlsVisibility();
     
+    // Initialize customHeaders if not present
+    if (channel && !channel.customHeaders) {
+        channel.customHeaders = {};
+    }
+
+    // Prepare existing headers for display
+    const existingHeaders = channel ? Object.entries(channel.customHeaders || {}) : [];
+
     // URL'den referrer ve user-agent bilgilerini ayıkla
     let referrer = '', userAgent = '';
     if (channel) {
@@ -1089,7 +1115,7 @@ function showChannelModal(channel = null) {
             <div class="modal-body">
                 <form id="channelForm">
                     <div class="form-group">
-                        <label>Kanal Adı</label>
+                        <label>Kanal Adı (<i class="fa fa-asterisk" aria-hidden="true" title="Zorunlu Alan" style="font-size: 8px;color:red;"></i>)</label>
                         <input type="text" name="tvgName" value="${channel?.tvgName || ''}" required>
                     </div>
                     <div class="form-group">
@@ -1131,11 +1157,12 @@ function showChannelModal(channel = null) {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Stream URL</label>
-                        <input type="url" name="channelUrl" value="${channel?.channelUrl || ''}" required>
+                        <label>Yayın URL Adresi (<i class="fa fa-asterisk" aria-hidden="true" title="Zorunlu Alan" style="font-size: 8px;color:red;"></i>)
+                        </button></label>  
+                        <input type="url" name="channelUrl" placeholder="Örn: https://iptsevenler.com/playlist.m3u8" value="${channel?.channelUrl || ''}" required>
                         <button type="button" class="btn-test" onclick="testChannelUrl(this.previousElementSibling.value)">
-                            <i class="fas fa-play"></i> Test Et
-                        </button>
+                            <i class="fab fa-youtube fa-xl"></i> Anında İzle
+                        
                     </div>
                     <div class="form-group">
                         <button type="button" class="btn-extras" onclick="toggleExtras(this)">
@@ -1144,15 +1171,41 @@ function showChannelModal(channel = null) {
                         </button>
                         <div class="extras-content hidden">
                             <div class="form-group">
+                                <label>HTTP Header Ekleme Alanı</label>
+                                <div class="http-headers-container">
+                                    ${existingHeaders.map(([name, value]) => `
+                                        <div class="header-pair">
+                                            <input type="text" name="httpHeaderName[]" value="${name}" placeholder="http-..." class="header-name" onchange="validateHeaderName(this)">
+                                            <input type="text" name="httpHeaderValue[]" value="${value}" placeholder="header değeri" class="header-value">
+                                            <button type="button" class="btn-remove-header" onclick="removeHeaderPair(this)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                    ${existingHeaders.length === 0 ? `
+                                        <div class="header-pair">
+                                            <input type="text" name="httpHeaderName[]" placeholder="http-..." class="header-name" onchange="validateHeaderName(this)">
+                                            <input type="text" name="httpHeaderValue[]" placeholder="header değeri" class="header-value">
+                                            <button type="button" class="btn-remove-header" onclick="removeHeaderPair(this)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <button type="button" class="btn-add-header" onclick="addHeaderPair()">
+                                    <i class="fas fa-plus"></i> Yeni Header
+                                </button>
+                            </div>
+                            <div class="form-group">
                                 <label>HTTP Referrer</label>
                                 <input type="text" name="httpReferrer" value="${referrer}" 
-                                       placeholder="Örn: https://example.com">
+                                       placeholder="Örn: https://iptvsevenler.com">
                             </div>
                             <div class="form-group">
                                 <label>User Agent</label>
                                 <div class="user-agent-container">
                                     <select name="userAgentPreset" class="user-agent-select">
-                                        <option value="">Özel User Agent...</option>
+                                        <option value="">Hazır User Agent Seç</option>
                                         ${Object.entries(PREDEFINED_USER_AGENTS).map(([name, agent]) => `
                                             <option value="${agent}" ${userAgent === agent ? 'selected' : ''}>
                                                 ${name}
@@ -1443,28 +1496,43 @@ function toggleExtras(button) {
 // Kanal kaydetme
 function saveChannel(index) {
     const form = document.getElementById('channelForm');
-    const formData = new FormData(form);
-    const channelData = Object.fromEntries(formData);
+    const headerPairs = Array.from(form.querySelectorAll('.header-pair')).map(pair => ({
+        name: pair.querySelector('.header-name').value.trim().toLowerCase(),
+        value: pair.querySelector('.header-value').value.trim()
+    }));
+    
+    const customHeaders = {};
+    headerPairs.forEach(({name, value}) => {
+        if (name && value && name.startsWith('http-') && name.match(/^http-[a-z0-9-]+$/)) {
+            customHeaders[name] = value;
+        }
+    });
+
+    const channelData = {
+        tvgName: form.querySelector('[name="tvgName"]').value.trim(),
+        tvgId: form.querySelector('[name="tvgId"]').value.trim(),
+        tvgLogo: form.querySelector('[name="tvgLogo"]').value.trim() || DEFAULT_LOGO,
+        groupTitle: form.querySelector('[name="groupTitle"]').value,
+        channelUrl: form.querySelector('[name="channelUrl"]').value.trim(),
+        httpReferrer: form.querySelector('[name="httpReferrer"]').value.trim(),
+        userAgent: form.querySelector('[name="userAgent"]').value.trim(),
+        customHeaders: customHeaders
+    };
     
     if (!channelData.tvgName || !channelData.channelUrl) {
         showNotification('Lütfen gerekli alanları doldurun', 'error');
         return;
     }
     
-    // HTTP referrer ve user agent bilgilerini ayrı ayrı sakla
-    const userAgent = channelData.customUserAgent || channelData.userAgent;
-    if (userAgent) {
-        channelData.userAgent = userAgent;
-    }
-    
-    // Form verilerini temizle
-    delete channelData.customUserAgent;
-    
     let notifications = []; // Bildirimleri saklamak için bir dizi oluştur
 
     if (index >= 0) {
         const oldChannel = channels[index]; // Eski kanal bilgilerini al
-        channels[index] = {...channels[index], ...channelData}; // Kanalı güncelle
+        channels[index] = {
+            ...oldChannel,
+            ...channelData,
+            customHeaders: channelData.customHeaders // Explicitly set customHeaders
+        }; // Kanalı güncelle
         showNotification('Kanal güncellendi', 'success');
         
         // Değişiklikleri kontrol et ve bildirim ekle
@@ -2157,7 +2225,9 @@ function showTextEditor(content) {
                 { token: 'string', foreground: 'CE9178' },
                 { token: 'string.link', foreground: '4EC9B0' },
                 { token: 'variable.name', foreground: 'DCDCAA' },
-                { token: 'comment', foreground: 'cccccc' }
+                { token: 'comment', foreground: 'cccccc' },
+                { token: 'header.name', foreground: 'cbdd18' },
+                { token: 'header.value', foreground: 'c92828' }
             ],
             colors: {
                 'editor.foreground': '#D4D4D4',
@@ -2187,8 +2257,7 @@ function showTextEditor(content) {
                     [/(group-title=)(["'][^"']*["'])/, ['attribute.name', 'string']],
                     
                     // EXTVLCOPT attributes
-                    [/(#EXTVLCOPT:http-referrer=)(.*)$/, ['keyword', 'comment']],
-                    [/(#EXTVLCOPT:http-user-agent=)(.*)$/, ['keyword', 'comment']],
+                    [/(#EXTVLCOPT:)(http-[^=]+=)(.*)$/, ['keyword', 'header.name', 'header.value']],
                     
                     // URLs
                     [/https?:\/\/[^\s]+/, 'string.link'],
@@ -4291,4 +4360,35 @@ function showConfirmation(message, onConfirm) {
         onConfirm();
         confirmationModal.remove();
     };
+}
+
+function validateHeaderName(input) {
+    const value = input.value.trim().toLowerCase();
+    if (value && !value.startsWith('http-')) {
+        input.value = 'http-' + value;
+    }
+    if (value && !value.match(/^http-[a-z0-9-]+$/)) {
+        showNotification('Header adı "http-" ile başlamalıdır. Sadece küçük harf, rakam ve tire(-) içerebilir!', 'error');
+        input.value = '';
+        return false;
+    }
+    return true;
+}
+
+function addHeaderPair() {
+    const container = document.querySelector('.http-headers-container');
+    const headerPair = document.createElement('div');
+    headerPair.className = 'header-pair';
+    headerPair.innerHTML = `
+        <input type="text" name="httpHeaderName[]" placeholder="http-..." class="header-name" onchange="validateHeaderName(this)">
+        <input type="text" name="httpHeaderValue[]" placeholder="header değeri" class="header-value">
+        <button type="button" class="btn-remove-header" onclick="removeHeaderPair(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(headerPair);
+}
+
+function removeHeaderPair(button) {
+    button.closest('.header-pair').remove();
 }
