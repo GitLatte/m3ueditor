@@ -75,7 +75,9 @@ Katkıda bulunmak için:
 
 ## 👥 Katkıda Bulunanlar
 
-- **patr0n** - Projeyi kurmam ve oluşturmamdaki katkısı yadırganmaz. Kardeşim benim!
+- [patr0n](https://github.com/patr0nq)
+  
+  Projeyi kurmam ve oluşturmamdaki katkısı yadırganmaz. Kardeşim benim!
   - patr0n m3u linkleri
   
 - **Memetcandal** - Onun için bir düzenleme programı yaparken iş buralara kadar geldi ;)
