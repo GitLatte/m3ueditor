@@ -75,6 +75,10 @@ Katkıda bulunmak için:
 
 ## 👥 Katkıda Bulunanlar
 
+<a href="https://github.com/patr0nq/patronSpor/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=patr0nq/patronSpor" />
+</a>
+
 - [patr0n](https://github.com/patr0nq)
   
   Projeyi kurmam ve oluşturmamdaki katkısı yadırganmaz. Kardeşim benim!
