@@ -1580,6 +1580,8 @@ body.dark-theme {
     border: 1px solid var(--dark-border);
     border-radius: 6px;
     background: #e4dede;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .extras-content.hidden {
@@ -1594,7 +1596,8 @@ body.dark-theme {
 }
 
 .extras-content:not(.hidden) {
-    max-height: 500px; /* Yeterli bir yükseklik */
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 /* Modal Kapatma Butonu */
