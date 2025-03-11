@@ -1440,9 +1440,9 @@ window.findMatchingLogos = function(channelName) {
                     <div class="logo-grid">
                         ${matchingLogos.map(logo => `
                             <div class="logo-option">
-                                <img src="images/kanal-gorselleri/turkiye/${logo}" 
+                                <img src="https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}" 
                                      alt="${logo}"
-                                     onclick="selectLogo('images/kanal-gorselleri/turkiye/${logo}')"
+                                     onclick="selectLogo('https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}')"
                                      onerror="this.src='${DEFAULT_LOGO}'">
                             </div>
                         `).join('')}
