@@ -1,4 +1,4 @@
-// EPG List data
+// EPG Listesi verisi
 const epgList = [
     {
         name: 'Türkiye EPG (Kanal Logoları) - Kendi hazırladığım kanal logoları için olan EPG listesi',
@@ -27,7 +27,7 @@ const epgList = [
     }
 ];
 
-// Show EPG list modal
+// EPG listesi modalını göster
 function showEpgList() {
     const epgListContent = epgList.map(epg => `
         <div class="epg-list-item" onclick="copyEpgUrl('${epg.url}')" title="Tıklayarak EPG URL'sini kopyalayın">
@@ -59,17 +59,17 @@ function showEpgList() {
 
     document.body.appendChild(modal);
 
-    // Close modal functionality
+    // Modal kapatma işlevselliği
     const closeBtn = modal.querySelector('.close');
     closeBtn.onclick = () => modal.remove();
 
-    // Close on outside click
+    // Dışarı tıklandığında kapat
     modal.onclick = (e) => {
         if (e.target === modal) modal.remove();
     };
 }
 
-// Copy EPG URL to clipboard and format it for M3U
+// EPG URL'sini panoya kopyala ve M3U için formatla
 function copyEpgUrl(url) {
     const epgAttribute = `x-tvg-url="${url}"`;
     navigator.clipboard.writeText(epgAttribute).then(() => {
@@ -80,7 +80,7 @@ function copyEpgUrl(url) {
     });
 }
 
-// Show EPG integration instructions
+// EPG entegrasyon talimatlarını göster
 function showEpgInstructions() {
     const instructions = `
         <div class="epg-instructions">

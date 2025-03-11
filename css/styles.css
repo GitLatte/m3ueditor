@@ -359,6 +359,7 @@ body.dark-theme {
     display: flex;
     gap: 15px;
     margin-left: auto; /* Sağa yaslamak için */
+    margin-bottom: 10px;
 }
 
 /* Section header butonları için stil */
@@ -433,6 +434,140 @@ body.dark-theme {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.channel-list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.channel-list-view {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-color);
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
+.channel-list-view .channel-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 12px;
+    border: none;
+    border-bottom: 2px solid #3c6e94 !important;
+    border-radius: 0;
+    transition: background-color 0.2s ease;
+    min-width: 800px;
+}
+
+.channel-list-view .channel-card:last-child {
+    border-bottom: none;
+}
+
+.channel-list-view .channel-card:hover {
+    transform: none;
+    box-shadow: none;
+    background-color: var(--bg-secondary);
+}
+
+.channel-list-view .channel-header {
+    display: grid;
+    grid-template-columns: 40px 200px 1fr;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.channel-list-view .channel-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.channel-list-view .channel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.channel-list-view .channel-info h3 {
+    font-size: 0.9em;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-color);
+}
+
+.channel-list-view .channel-group {
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+.channel-list-view .channel-actions {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    align-items: center;
+    position: relative;
+}
+
+.channel-list-view .channel-actions .favorite-button {
+    position: static;
+    margin-right: 10px;
+    background: transparent;
+    border: none !important;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+}
+
+.channel-list-view .channel-actions .favorite-button:hover {
+    background: transparent;
+    border: 1px solid var(--border-color);
+}
+
+.channel-list-view .channel-actions .favorite-button:hover i.far.fa-heart {
+    color: #ff3366;
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.4),
+                0 0 20px rgba(255, 51, 102, 0.2);
+}
+
+.channel-list-view .channel-actions .favorite-button i.fas.fa-heart {
+    color: #ff3366;
+    animation: heartbeat 1.5s infinite;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.6),
+                0 0 20px rgba(255, 51, 102, 0.4),
+                0 0 30px rgba(255, 51, 102, 0.2);
+}
+
+.channel-list-view .channel-card:hover .channel-actions {
+    opacity: 1;
+}
+
+.channel-list-view .channel-actions button {
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    border-radius: 3px;
+    font-size: 0.85em;
+    transition: all 0.2s ease;
+}
+
+.channel-list-view .channel-actions button:hover {
+    background: var(--hover-color);
 }
 
 /* Logo suggestion styles */
@@ -573,6 +708,14 @@ body.dark-theme {
 }
 
 /* Kanal Kartı */
+.channel-card-view {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Channel list container */
 .channel-card {
     position: relative;
     background: var(--bg-color);
@@ -583,8 +726,8 @@ body.dark-theme {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    border-left: 5px solid transparent; /* Renk dinamik olarak ayarlanacak */
-    transition: border-color 0.3s ease;
+    border-left: 5px solid transparent;
+    transition: all 0.3s ease;
 }
 
 .order-number {
@@ -2422,8 +2565,28 @@ label {
 /* Filter container için stil ayarları */
 .filter-container {
     display: flex;
-    gap: 10px;
     align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.view-toggle {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-toggle:hover {
+    background: var(--hover-color);
+}
+
+.view-toggle i {
+    font-size: 1.3em;
 }
 
 /* Açılır menü için stil ayarları */
@@ -2435,6 +2598,18 @@ select#sortFilter {
     border-radius: 4px;
     padding: 8px;
     font-size: 16px;
+}
+
+#groupFilter {
+    max-width: 200px;
+    overflow: hidden;
+}
+
+#groupFilter option {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Seçenekler için stil ayarları */
@@ -3515,8 +3690,7 @@ select#sortFilter option[value="favorites"] {
 }
 
 .btn-remove-header:hover {
-    background: var(--danger);
-    color: white;
+    background: var(--danger);    color: white;
 }
 
 .btn-add-header {

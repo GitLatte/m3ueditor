@@ -13,8 +13,9 @@ function toggleTheme() {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
-// Varsayılan logo URL'sini değiştirelim
-const DEFAULT_LOGO = 'images/default-channel.png';  // Görüntüleme için
+// Logo URL'lerini tanımla
+const DEFAULT_LOGO = 'images/default-channel.png';  // Varsayılan logo
+const BROKEN_LOGO = 'images/broken-image.svg';     // Hatalı logo
 const FALLBACK_LOGO = 'images/default-channel.png'; // Kaydetme için
 
 // Hazır User Agent listesi
@@ -91,12 +92,28 @@ function getGroupInfo(groupTitle) {
 }
 
 // Kanal kartı oluşturma
+function toggleViewMode() {
+    const channelList = document.getElementById('channelList');
+    const viewToggle = document.querySelector('.view-toggle');
+    
+    // First update the channel list view
+    const newViewMode = currentViewMode === 'card' ? 'list' : 'card';
+    channelList.className = `channel-${newViewMode}-view`;
+    
+    // Then update view mode state
+    currentViewMode = newViewMode;
+    localStorage.setItem('channelViewMode', currentViewMode);
+    
+    // Update button icon and title
+    viewToggle.innerHTML = `<i class="fas fa-${currentViewMode === 'card' ? 'list' : 'th'}"></i>`;
+    viewToggle.title = `${currentViewMode === 'card' ? 'Liste' : 'Kart'} görünümüne geç`;
+    
+    // Refresh channel list
+    updateChannelList();
+}
+
 function createChannelCard(channel, index, filteredChannels = null) {
     const displayLogo = channel.tvgLogo || DEFAULT_LOGO;
-    const realIndex = channels.findIndex(ch => 
-        (ch.tvgId && ch.tvgId === channel.tvgId) || 
-        (ch.tvgName === channel.tvgName && ch.channelUrl === channel.channelUrl)
-    );
     
     // Grup simgesi ve rengi
     const groupInfo = getGroupInfo(channel.groupTitle);
@@ -115,7 +132,7 @@ function createChannelCard(channel, index, filteredChannels = null) {
                 <img src="${displayLogo}" 
                      alt="${channel.tvgName}" 
                      class="channel-logo"
-                     onerror="this.src='${DEFAULT_LOGO}'">
+                     onerror="this.src='${BROKEN_LOGO}'">
                 <div class="channel-info">
                     <h3>${channel.tvgName}</h3>
                     <div class="channel-group">
@@ -136,10 +153,10 @@ function createChannelCard(channel, index, filteredChannels = null) {
                 <button class="favorite-button" onclick="toggleFavorite('${encodeURIComponent(channel.channelUrl)}', event)">
                     <i class="${favoriteIconClass}"></i>
                 </button>
-                <button data-action="edit" data-index="${realIndex}" onclick="editChannel(${realIndex})">
+                <button data-action="edit" data-index="${index}" onclick="editChannel(${index})">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button data-action="delete" data-index="${realIndex}" onclick="deleteChannel(${realIndex})">
+                <button data-action="delete" data-index="${index}" onclick="deleteChannel(${index})">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -161,6 +178,9 @@ function updateChannelList(filteredChannels = null, page = null) {
     const groupFilter = document.getElementById('groupFilter');
     const paginationContainer = document.getElementById('channelPagination');
 
+    // Store current group filter value before any updates
+    const currentGroupFilter = groupFilter ? groupFilter.value : '';
+
     // Use current page if no specific page is provided
     const targetPage = page !== null ? page : currentPage;
 
@@ -180,7 +200,7 @@ function updateChannelList(filteredChannels = null, page = null) {
         displayChannels = [...filteredChannels];
     } else {
         // Apply group filter if no specific filtered channels provided
-        const selectedGroup = groupFilter ? groupFilter.value : '';
+        const selectedGroup = currentGroupFilter;
         if (selectedGroup && selectedGroup !== 'all') {
             displayChannels = channels.filter(ch => ch.groupTitle === selectedGroup);
         } else {
@@ -223,7 +243,10 @@ function updateChannelList(filteredChannels = null, page = null) {
             createChannelCard(channel, startIndex + index, currentChannels)
         ).join('');
 
-        // Update UI elements
+        // Update UI elements while preserving group filter
+        if (groupFilter) {
+            groupFilter.value = currentGroupFilter;
+        }
         updateGroupFilter();
         document.querySelector('.section-buttons').style.display = 'flex';
         attachEventListenersToVisibleChannels(startIndex);
@@ -423,11 +446,24 @@ document.querySelector('.search-bar input').addEventListener('input', function(e
 });
 
 // Quick Actions ve Yeni Kanal butonunun görünürlüğünü kontrol etme
+// View mode state
+let currentViewMode = localStorage.getItem('channelViewMode') || 'card';
+
 function updateControlsVisibility() {
     const hasChannels = document.querySelector('#channelList').children.length > 0;
     const filterContainer = document.querySelector('.filter-container');
     const searchBar = document.querySelector('.search-bar');
     const addButton = document.querySelector('.btn-add');
+    
+    // Add view toggle button if it doesn't exist
+    if (!document.querySelector('.view-toggle')) {
+        const viewToggle = document.createElement('button');
+        viewToggle.className = 'view-toggle';
+        viewToggle.innerHTML = `<i class="fas fa-${currentViewMode === 'card' ? 'list' : 'th'}"></i>`;
+        viewToggle.title = `${currentViewMode === 'card' ? 'Liste' : 'Kart'} görünümüne geç`;
+        viewToggle.onclick = toggleViewMode;
+        filterContainer.insertBefore(viewToggle, filterContainer.firstChild);
+    }
 
     if (hasChannels) {
         filterContainer.style.display = 'block';
@@ -918,8 +954,8 @@ function parseM3U(content) {
             } else if (line.startsWith('#EXTVLCOPT:http-user-agent=')) {
                 userAgent = line.replace('#EXTVLCOPT:http-user-agent=', '');
                 if (currentChannel) currentChannel.userAgent = userAgent;
-            } else if (line.startsWith('#EXTVLCOPT:http-custom-header=')) {
-                const headerPart = line.replace('#EXTVLCOPT:http-custom-header=', '');
+            } else if (line.startsWith('#EXTVLCOPT:')) {
+                const headerPart = line.replace('#EXTVLCOPT:', '');
                 const [name, value] = headerPart.split('=');
                 if (currentChannel && name && value) {
                     currentChannel.customHeaders[name] = value;
@@ -1052,7 +1088,7 @@ function generateM3UContent() {
         }
         if (channel.customHeaders) {
             for (const [name, value] of Object.entries(channel.customHeaders)) {
-                content += `#EXTVLCOPT:http-custom-header=${name}=${value}\n`;
+                content += `#EXTVLCOPT:${name}=${value}\n`;
             }
         }
         
@@ -1141,7 +1177,7 @@ function showChannelModal(channel = null) {
                         </div>
                         <div class="logo-preview">
                             <img src="${channel?.tvgLogo || DEFAULT_LOGO}" 
-                                 onerror="this.src='${DEFAULT_LOGO}'">
+                                 onerror="this.src='${BROKEN_LOGO}'">
                         </div>
                     </div>
                     <div class="form-group">
@@ -1524,18 +1560,25 @@ function saveChannel(index) {
         return;
     }
     
-    let notifications = []; // Bildirimleri saklamak için bir dizi oluştur
+    // Get current search term and group filter before updating
+    const searchInput = document.querySelector('.search-bar input');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const groupFilter = document.getElementById('groupFilter');
+    const selectedGroup = groupFilter ? groupFilter.value : '';
+
+    let notifications = [];
 
     if (index >= 0) {
-        const oldChannel = channels[index]; // Eski kanal bilgilerini al
+        const oldChannel = channels[index];
+        // Update only the specified channel at the given index
         channels[index] = {
             ...oldChannel,
             ...channelData,
-            customHeaders: channelData.customHeaders // Explicitly set customHeaders
-        }; // Kanalı güncelle
+            customHeaders: channelData.customHeaders
+        };
         showNotification('Kanal güncellendi', 'success');
         
-        // Değişiklikleri kontrol et ve bildirim ekle
+        // Check for changes and add notifications
         if (oldChannel.tvgName !== channelData.tvgName) {
             notifications.push(`<br/><span class="bildirim-baslik">İsim Değişikliği:</span>`, `<span class="bildirim-kanaladi">${oldChannel.tvgName}</span> kanalının adı "<span class="bildirim-yeni-deger">${channelData.tvgName}</span>" olarak değiştirildi`);
         }
@@ -1604,7 +1647,29 @@ function saveChannel(index) {
         addNotification('Kanal Güncellemesi<br/>', notifications.join('<br/> '));
     }
 
-    updateChannelList();
+    // Clear search term if it exists
+    if (searchInput) {
+        searchInput.value = '';
+        const searchIcon = document.querySelector('.search-bar i');
+        if (searchIcon) {
+            updateSearchIcon(false);
+        }
+    }
+
+    // Update the channel list while maintaining group filter state
+    if (selectedGroup && selectedGroup !== 'all') {
+        // If there's an active group filter, show only channels from that group
+        const filteredChannels = channels.filter(ch => ch.groupTitle === selectedGroup);
+        updateChannelList(filteredChannels, currentPage);
+        // Update group filter to maintain group view state
+        if (groupFilter) {
+            groupFilter.value = selectedGroup;
+        }
+    } else {
+        // If no filter is active, show all channels
+        updateChannelList(null, currentPage);
+    }
+    
     updateUnsavedChanges(true);
     updateCounts();
     closeModal();
@@ -1615,12 +1680,25 @@ function deleteChannel(index) {
     if (confirm('Bu kanalı silmek istediğinizden emin misiniz?')) {
         const removedChannel = channels[index]; // Silinen kanal bilgilerini al
         channels.splice(index, 1); // Kanalı sil
-        updateChannelList();
+        
+        // Mevcut filtreleme ve sayfalama durumunu koru
+        const currentFilters = {
+            group: document.getElementById('groupFilter')?.value || 'all',
+            sort: document.getElementById('sortFilter')?.value || 'default'
+        };
+        
+        // Filtrelenmiş kanalları güncelle
+        let filteredChannels = channels;
+        if (currentFilters.group !== 'all') {
+            filteredChannels = channels.filter(ch => ch.groupTitle === currentFilters.group);
+        }
+        
+        updateChannelList(filteredChannels, currentPage);
         updateUnsavedChanges(true);
         showNotification('Kanal silindi', 'success');
         
-        // Kanal silindiğinde
-        addNotification('<br>Kanal Silindi', `<span class="bildirim-kanaladi">${removedChannel.tvgName}</span> kanalı silindi`); // Silinen kanalın adını kullan
+        // Kanal silindiğinde bildirim
+        addNotification('<br>Kanal Silindi', `<span class="bildirim-kanaladi">${removedChannel.tvgName}</span> kanalı silindi`);
     }
 }
 
@@ -2150,7 +2228,7 @@ function setupMonacoEditor(editor) {
 }
 
 function showTextEditor(content) {
-    // Check if the list has 5000 or more channels
+    // Listenin 5000 veya daha fazla kanal içerip içermediğini kontrol et
     const channelCount = (content.match(/#EXTINF/g) || []).length;
     if (channelCount >= 5000) {
         if (!confirm('5000 veya üzeri kanal olan listeleri metin editörü ile kullanırken tarayıcınız zorlanabilir. O yüzden bu tip listeleri hiç zorlanmadan ve kolayca düzenlemek için site arayüzündeki uygulama sistemi ile düzenlemenizi öneririm. Yine de;\n\nDevam etmek istiyor musunuz?')) {
@@ -2214,7 +2292,7 @@ function showTextEditor(content) {
 
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs' }});
     require(['vs/editor/editor.main'], function() {
-        // Define custom theme for M3U syntax highlighting
+        // M3U sözdizimi vurgulaması için özel tema tanımla
         monaco.editor.defineTheme('m3u-dark', {
             base: 'vs-dark',
             inherit: true,
@@ -2245,30 +2323,30 @@ function showTextEditor(content) {
             defaultToken: '',
             tokenizer: {
                 root: [
-                    // Main tags
+                    // Ana etiketler
                     [/#EXTM3U/, 'keyword'],
                     [/(x-tvg-url=)(["'][^"']*["'])/, ['attribute2.name', 'string']],
                     [/#EXTINF:-1/, 'keyword'],
                     
-                    // TVG attributes with name-value separation
+                    // TVG öznitelikleri ad-değer ayrımı ile
                     [/(tvg-id=)(["'][^"']*["'])/, ['attribute.name', 'string']],
                     [/(tvg-name=)(["'][^"']*["'])/, ['attribute.name', 'string']],
                     [/(tvg-logo=)(["'][^"']*["'])/, ['attribute.name', 'string']],
                     [/(group-title=)(["'][^"']*["'])/, ['attribute.name', 'string']],
                     
-                    // EXTVLCOPT attributes
+                    // EXTVLCOPT öznitelikleri
                     [/(#EXTVLCOPT:)(http-[^=]+=)(.*)$/, ['keyword', 'header.name', 'header.value']],
                     
-                    // URLs
+                    // URL'ler
                     [/https?:\/\/[^\s]+/, 'string.link'],
                     
-                    // Channel names after comma
+                    // Virgülden sonraki kanal adları
                     [/,[^\n]+/, 'variable.name']
                 ]
             }
         });
 
-        // Create editor with custom theme
+        // Özel tema ile editörü oluştur
         const editor = monaco.editor.create(document.getElementById('editor-container'), {
             value: content || '',
             language: 'm3u',
@@ -2293,7 +2371,7 @@ function showTextEditor(content) {
             }
         });
 
-        // Check if completion provider is already registered
+        // Tamamlama sağlayıcısının zaten kayıtlı olup olmadığını kontrol et
         if (!window.m3uCompletionProviderRegistered) {
             monaco.languages.registerCompletionItemProvider('m3u', {
                 provideCompletionItems: function(model, position) {
@@ -2710,16 +2788,22 @@ document.addEventListener('DOMContentLoaded', function() {
         sortFilter.addEventListener('change', () => {
             const groupFilter = document.getElementById('groupFilter');
             const selectedGroup = groupFilter.value;
-            const filteredChannels = selectedGroup 
+            let filteredChannels = selectedGroup && selectedGroup !== 'all'
                 ? channels.filter(ch => ch.groupTitle === selectedGroup)
                 : [...channels];
-            // Hide no-results state and show filtered channels
-        window.noResultsManager.hide();
-        updateChannelList(filteredChannels);
-        // Show empty state if no channels are available
-        if (filteredChannels.length === 0) {
-            document.getElementById('emptyState').style.display = 'flex';
-        }
+
+            // Apply sorting to the filtered channels
+            filteredChannels = sortChannels(filteredChannels, sortFilter.value);
+
+            // Hide no-results state
+            window.noResultsManager.hide();
+
+            // Update channel list with sorted and filtered channels
+            if (filteredChannels.length > 0) {
+                updateChannelList(filteredChannels);
+            } else {
+                document.getElementById('emptyState').style.display = 'flex';
+            }
         });
     }
 
@@ -2838,27 +2922,15 @@ function reattachEventListeners() {
 
 // Kanal düzenleme fonksiyonu
 function editChannel(index) {
-    const channel = channels[index];
-    if (!channel) {
-        showNotification('Kanal bulunamadı', 'error');
-        return;
-    }
+    // Find the channel in the global channels array using the URL as a unique identifier
+    const displayedChannel = currentChannels[index];
+    if (!displayedChannel) return;
     
-    // Get the current group filter value
-    const groupFilter = document.getElementById('groupFilter');
-    const currentGroup = groupFilter ? groupFilter.value : '';
+    // Find the actual index in the global channels array
+    const globalIndex = channels.findIndex(ch => ch.channelUrl === displayedChannel.channelUrl);
+    if (globalIndex === -1) return;
     
-    showChannelModal(channel);
-    
-    // Logo önerilerini göster
-    const logoInput = document.querySelector('input[name="tvgLogo"]');
-    const suggestButton = document.querySelector('.btn-suggest-logo');
-    if (logoInput && suggestButton) {
-        const matches = findMatchingLogos(channel.tvgName);
-        suggestButton.classList.toggle('has-suggestions', matches.length > 0);
-    }
-    
-    updateCounts();
+    showChannelModal(channels[globalIndex]);
 }
 
 // Yeni kanal ekleme fonksiyonu
@@ -3411,6 +3483,9 @@ function updateGroupFilter() {
     const groupFilter = document.getElementById('groupFilter');
     if (!groupFilter) return;
 
+    // Get current selected value before updating
+    const currentSelection = groupFilter.value;
+
     // Eski event listener'ı kaldır
     const oldListener = groupFilter._changeListener;
     if (oldListener) {
@@ -3418,8 +3493,7 @@ function updateGroupFilter() {
     }
 
     // Mevcut grupları temizle
-    groupFilter.innerHTML = '<option value="">Gruba Göre Filtrele</option>';
-    groupFilter.innerHTML += '<option value="all">Tüm Gruplar</option>';
+    groupFilter.innerHTML = '<option value="all">Tüm Gruplar</option>';
 
     // Benzersiz grupları al
     const uniqueGroups = [...new Set(channels.map(ch => ch.groupTitle))].sort();
@@ -3446,8 +3520,6 @@ function updateGroupFilter() {
         
         if (selectedGroup === 'all') {
             filteredChannels = [...channels];
-        } else if (selectedGroup === '') {
-            return; // Başlık seçildiğinde hiçbir şey yapma
         } else {
             filteredChannels = [...channels].filter(ch => ch.groupTitle === selectedGroup);
         }
@@ -3455,17 +3527,20 @@ function updateGroupFilter() {
         // Hide no-results state and show filtered channels
         window.noResultsManager.hide();
         updateChannelList(filteredChannels);
+        
         // Show empty state if no channels are available
         if (filteredChannels.length === 0) {
             document.getElementById('emptyState').style.display = 'flex';
         }
-        
-        // Seçili değeri güncelle
-        groupFilter.value = selectedGroup; // Seçili grup adını güncelle
     };
     
     groupFilter._changeListener = newListener;
     groupFilter.addEventListener('change', newListener);
+
+    // Restore previous selection if it exists
+    if (currentSelection && currentSelection !== 'all') {
+        groupFilter.value = currentSelection;
+    }
 }
 
 // Kanalları sıralama fonksiyonu
@@ -3486,8 +3561,13 @@ function sortChannels(channels, sortType) {
             return channelsCopy.sort((a, b) => {
                 const aHasLogo = a.tvgLogo && a.tvgLogo !== DEFAULT_LOGO;
                 const bHasLogo = b.tvgLogo && b.tvgLogo !== DEFAULT_LOGO;
-                if (!aHasLogo && bHasLogo) return -1; // Logo problemi olanlar üste
-                if (aHasLogo && !bHasLogo) return 1;
+                // First sort by logo presence
+                if (!aHasLogo && bHasLogo) return -1; // No logo channels to top
+                if (aHasLogo && !bHasLogo) return 1; // Logo channels to bottom
+                // If both have logo or both don't have logo, sort by name
+                if ((!aHasLogo && !bHasLogo) || (aHasLogo && bHasLogo)) {
+                    return a.tvgName.localeCompare(b.tvgName, 'tr');
+                }
                 return 0;
             });
         default:
@@ -3502,7 +3582,7 @@ function setupSearch() {
     let currentFiltered = null; // Mevcut filtrelenmiş kanalları sakla
 
     // Arama simgesini güncelle
-    function updateSearchIcon(hasValue) {
+    window.updateSearchIcon = function(hasValue) {
         if (hasValue) {
             searchIcon.classList.remove('fa-search');
             searchIcon.classList.add('fa-times');
@@ -3565,7 +3645,7 @@ function setupSearch() {
         // Update visibility based on search results
         window.noResultsManager.updateVisibility(searchResults);
         if (searchResults.length > 0) {
-            updateChannelList(searchResults);
+            updateChannelList(searchResults, currentPage);
         }
     }
 
@@ -3589,6 +3669,7 @@ function listChannelGroups() {
     const groupList = document.getElementById('groupList');
     const paginationContainer = document.getElementById('channelPagination');
     const channelList = document.getElementById('channelList');
+    const groupFilter = document.getElementById('groupFilter');
 
     // Hide channel list and show group list
     channelList.style.display = 'none';
@@ -3636,6 +3717,11 @@ function listChannelGroups() {
                 paginationContainer.style.display = 'flex';
             }
             
+            // Update group filter dropdown to reflect selected group
+            if (groupFilter) {
+                groupFilter.value = selectedGroup;
+            }
+            
             // Reset to first page when showing filtered channels
             updateChannelList(filteredChannels, 0);
         }
@@ -3670,11 +3756,20 @@ document.querySelector('.section-header:first-child h2').addEventListener('click
     const groupList = document.getElementById('groupList');
     const channelList = document.getElementById('channelList');
     const channelListHeader = document.querySelector('.section-header:first-child');
+    const groupFilter = document.getElementById('groupFilter');
+    
+    // Reset group filter to show all channels
+    if (groupFilter) {
+        groupFilter.value = 'all';
+    }
     
     groupList.style.display = 'none';
     channelList.style.display = 'grid';
     channelListHeader.querySelector('h2').style.color = 'var(--primary)';
     document.getElementById('groupHeader').style.color = 'var(--text-muted)';
+    
+    // Update channel list with no filters
+    currentChannels = [...channels];
     updateChannelList();
 });
 

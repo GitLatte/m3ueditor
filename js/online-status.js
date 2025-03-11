@@ -1,4 +1,4 @@
-// Function to check online status from the forum
+// Forumdan çevrimiçi durumunu kontrol etme fonksiyonu
 async function checkOnlineStatus() {
     try {
         const proxyUrl = 'https://cors.gitlatte.workers.dev/?url=';
@@ -7,23 +7,23 @@ async function checkOnlineStatus() {
         const response = await fetch(proxyUrl + encodeURIComponent(forumUrl));
         const html = await response.text();
         
-        // Check if 'Latte' is in the online users list
+        // 'Latte' çevrimiçi kullanıcılar listesinde mi kontrol et
         const isOnline = html.toLowerCase().includes('latte');
         
-        // Update the visual indicator
+        // Görsel göstergeyi güncelle
         updateOnlineIndicator(isOnline);
     } catch (error) {
-        console.error('Error checking online status:', error);
-        // In case of error, don't show the indicator
+        console.error('Çevrimiçi durum kontrolünde hata:', error);
+        // Hata durumunda göstergeyi gizle
         updateOnlineIndicator(false);
     }
 }
 
-// Function to update the visual indicator
+// Görsel göstergeyi güncelleme fonksiyonu
 function updateOnlineIndicator(isOnline) {
     const footerLink = document.querySelector('.footer a');
     
-    // Remove existing indicator if any
+    // Varsa mevcut göstergeyi kaldır
     const existingIndicator = document.querySelector('.online-indicator');
     if (existingIndicator) {
         existingIndicator.remove();
@@ -37,7 +37,7 @@ function updateOnlineIndicator(isOnline) {
     }
 }
 
-// Add styles for the online indicator
+// Çevrimiçi göstergesi için stil ekle
 const style = document.createElement('style');
 style.textContent = `
 .online-indicator {
@@ -59,6 +59,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Check status initially and then every 60 seconds
+// İlk kontrolü yap ve sonra her 60 saniyede bir kontrol et
 checkOnlineStatus();
 setInterval(checkOnlineStatus, 60000);

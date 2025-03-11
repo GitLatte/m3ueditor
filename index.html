@@ -179,7 +179,6 @@
                     <div class="list-actions">
                         <div class="filter-container" style="display: none;">
                             <select id="groupFilter">
-                                <option value="">Gruba Göre Filtrele</option>
                                 <option value="all">Tüm Gruplar</option>
                             </select>
                             <select id="sortFilter">
@@ -190,16 +189,16 @@
                                 <option value="logo">Logosuzlar Üstte</option>
                             </select>
                         </div>
-                        <div class="search-bar" style="display: none;">
+                        <div class="search-bar filter-container" style="display: none;">
                             <i class="fas fa-search"></i>
                             <input id="aramazsanaramayar" type="text" placeholder="Kanal ara...">
                         </div>
+                    </div>
+                    <div class="section-buttons">
                         <button data-action="add" class="btn-add" style="display: none;">
                             <i class="fa-regular fa-square-plus"></i>
                             Yeni Kanal Ekle
                         </button>
-                    </div>
-                    <div class="section-buttons">
                         <h2><i class="fas fa-tv"></i> Kanallar</h2>
                         <h2 id="groupHeader"><i class="fas fa-folder"></i> Kanal Grupları</h2>
                         <h2 onclick="showStatistics()"><i class="fas fa-chart-bar"></i> İstatistikler</h2>
