@@ -14,9 +14,9 @@ function toggleTheme() {
 }
 
 // Logo URL'lerini tanımla
-const DEFAULT_LOGO = 'images/default-channel.png';  // Varsayılan logo
-const BROKEN_LOGO = 'images/broken-image.svg';     // Hatalı logo
-const FALLBACK_LOGO = 'images/default-channel.png'; // Kaydetme için
+const DEFAULT_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png';  // Varsayılan logo
+const BROKEN_LOGO = 'https://gitlatte.github.io/m3ueditor/images/broken-image.svg';     // Hatalı logo
+const FALLBACK_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png'; // Kaydetme için
 
 // Hazır User Agent listesi
 const PREDEFINED_USER_AGENTS = {
