@@ -6,23 +6,23 @@ const epgList = [
         icon: 'fas fa-images'
     },
     {
-        name: 'Turkey EPG 1',
-        url: 'https://raw.githubusercontent.com/epgshare01/share01/master/epg_ripper_TR1.xml.gz',
+        name: 'Türkiye EPG 1 (146 kanal)',
+        url: 'https://www.open-epg.com/files/turkey1.xml',
         icon: 'fas fa-external-link-alt'
     },
     {
-        name: 'Turkey EPG 2',
-        url: 'https://raw.githubusercontent.com/epgshare01/share01/master/epg_ripper_TR2.xml.gz',
+        name: 'Türkiye EPG 2 (149 kanal)',
+        url: 'https://www.open-epg.com/files/turkey2.xml',
         icon: 'fas fa-external-link-alt'
     },
     {
-        name: 'Turkey EPG 3',
-        url: 'https://raw.githubusercontent.com/epgshare01/share01/master/epg_ripper_TR3.xml.gz',
+        name: 'Türkiye EPG 3 (144 kanal)',
+        url: 'https://www.open-epg.com/files/turkey3.xml',
         icon: 'fas fa-external-link-alt'
     },
     {
-        name: 'Turkey EPG 4',
-        url: 'https://raw.githubusercontent.com/epgshare01/share01/master/epg_ripper_TR4.xml.gz',
+        name: 'Türkiye EPG 4 (172 kanal)',
+        url: 'https://www.open-epg.com/files/turkey4.xml',
         icon: 'fas fa-external-link-alt'
     }
 ];
