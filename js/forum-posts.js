@@ -249,7 +249,7 @@ function createForumPostsModal() {
                         </div>
                         <div class="forum-post-item">
                             <div class="post-header">
-                                <h4><i class="fas fa-user"></i> Yazar: <span class="author">umitMOD</span></h4>
+                                <h4><i class="fas fa-user"></i> Yazar: <span class="author">umitM0D</span></h4>
                                 <h4>Adres: <a href="https://forum.sinetech.tr/" target="_blank">Sinetech.tr</a></h4>
                                 <span class="post-date">19 Şubat 2025</span>
                             </div>
