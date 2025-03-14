@@ -33,6 +33,18 @@ function createForumPostsModal() {
                         </div>
                         <div class="forum-post-item">
                             <div class="post-header">
+                                <h4><i class="fas fa-user"></i> Yazar: <span class="author">dehakan7</span></h4>
+                                <h4>Adres: <a href="https://forum.sinetech.tr/" target="_blank">Sinetech.tr</a></h4>
+                                <span class="post-date">-</span>
+                            </div>
+                            <h5 class="post-title">💡Birden fazla konu sahibi</h5>
+                            <p class="post-excerpt">Forumun en hızlı rütbe alanı. Paylaşım canavar ve müdavimi. Görmek için tıklayın.</p>
+                            <a href="https://forum.sinetech.tr/arama/106889/?t=thread&c[content]=thread&c[users]=dehakan7&o=date" target="_blank" class="post-link">
+                                <i class="fa-brands fa-wpforms"></i> Konuya Git
+                            </a>
+                        </div>
+                        <div class="forum-post-item">
+                            <div class="post-header">
                                 <h4><i class="fas fa-user"></i> Yazar: <span class="author">Latte</span></h4>
                                 <h4>Adres: <a href="https://forum.sinetech.tr/" target="_blank">Sinetech.tr</a></h4>
                                 <span class="post-date">26 Ocak 2025</span>
