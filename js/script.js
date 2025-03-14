@@ -2062,134 +2062,6 @@ function showStatistics() {
     };
 }
 
-// Seçim modunu kapat
-function disableSelectionMode() {
-    const channelCards = document.querySelectorAll('.channel-card');
-    channelCards.forEach(card => {
-        card.classList.remove('selectable', 'selected');
-        card.onclick = null;
-    });
-    
-    const bar = document.querySelector('.bulk-action-bar');
-    if (bar) bar.remove();
-}
-
-// Toplu grup değiştirme
-function bulkChangeGroup() {
-    const selectedCards = document.querySelectorAll('.channel-card.selected');
-    if (!selectedCards.length) return;
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal bulk-group-modal';
-    
-    const groups = Array.from(new Set(channels.map(ch => ch.groupTitle)));
-    
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-layer-group"></i> Grup Değiştir</h3>
-                <button class="close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>${selectedCards.length} kanal seçildi</p>
-                <select id="bulkGroupSelect">
-                    <option value="">Grup Seçin...</option>
-                    ${groups.map(group => `
-                        <option value="${group}">${group}</option>
-                    `).join('')}
-                    <option value="new">+ Yeni Grup</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button onclick="applyBulkGroupChange()">Uygula</button>
-                <button onclick="closeModal()">İptal</button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Yeni grup seçeneği
-    const groupSelect = modal.querySelector('#bulkGroupSelect');
-    groupSelect.addEventListener('change', function() {
-        if (this.value === 'new') {
-            const newGroup = prompt('Yeni grup adı:');
-            if (newGroup) {
-                const option = document.createElement('option');
-                option.value = option.textContent = newGroup;
-                option.selected = true;
-                this.insertBefore(option, this.lastElementChild);
-            } else {
-                this.value = '';
-            }
-        }
-    });
-}
-
-// Toplu grup değişikliğini uygula
-function applyBulkGroupChange() {
-    const newGroup = document.getElementById('bulkGroupSelect').value;
-    if (!newGroup) {
-        showNotification('Lütfen bir grup seçin', 'error');
-        return;
-    }
-    
-    const selectedCards = document.querySelectorAll('.channel-card.selected');
-    selectedCards.forEach(card => {
-        const index = channels.findIndex(ch => ch.tvgId === card.dataset.id);
-        if (index !== -1) {
-            channels[index].groupTitle = newGroup;
-        }
-    });
-    
-    updateChannelList();
-    updateUnsavedChanges(true);
-    closeModal();
-    disableSelectionMode();
-    showNotification(`${selectedCards.length} kanal "${newGroup}" grubuna taşındı`, 'success');
-    updateCounts();
-}
-
-// Toplu silme
-function bulkDelete() {
-    const selectedCards = document.querySelectorAll('.channel-card.selected');
-    if (!selectedCards.length) return;
-    
-    if (confirm(`${selectedCards.length} kanalı silmek istediğinizden emin misiniz?`)) {
-        selectedCards.forEach(card => {
-            const index = channels.findIndex(ch => ch.tvgId === card.dataset.id);
-            if (index !== -1) {
-                channels.splice(index, 1);
-            }
-        });
-        
-        updateChannelList();
-        updateUnsavedChanges(true);
-        disableSelectionMode();
-        showNotification(`${selectedCards.length} kanal silindi`, 'success');
-        updateCounts();
-    }
-}
-
-// Toplu favori işlemi
-function bulkFavorite() {
-    const selectedCards = document.querySelectorAll('.channel-card.selected');
-    if (!selectedCards.length) return;
-    
-    selectedCards.forEach(card => {
-        const index = channels.findIndex(ch => ch.tvgId === card.dataset.id);
-        if (index !== -1) {
-            channels[index].isFavorite = true;
-        }
-    });
-    
-    updateChannelList();
-    updateUnsavedChanges(true);
-    disableSelectionMode();
-    showNotification(`${selectedCards.length} kanal favorilere eklendi`, 'success');
-    updateCounts();
-}
-
 function setupMonacoEditor(editor) {
     // Add keyboard shortcut handlers
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
@@ -3157,9 +3029,9 @@ function patr0nListeleri() {
 }
 function patr0nLinkTest() {
     const modal = document.createElement('div');
-    modal.className = 'modal video-test-modal';
+    modal.className = 'modal patronlinktest';
     modal.innerHTML = `
-        <div class="modal-content" style="max-width: 625px; max-height: 800px">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3><i class="fa-regular fa-star"></i> Linkleri Topla - URL Geçerlilik Kontrolü</h3>
                 <button class="close">&times;</button>
@@ -3680,6 +3552,20 @@ function listChannelGroups() {
 
     const fragment = document.createDocumentFragment();
 
+    // Add bulk delete button container if it doesn't exist
+    let bulkDeleteContainer = document.getElementById('bulkDeleteContainer');
+    if (!bulkDeleteContainer) {
+        bulkDeleteContainer = document.createElement('div');
+        bulkDeleteContainer.id = 'bulkDeleteContainer';
+        bulkDeleteContainer.style.display = 'none';
+        bulkDeleteContainer.innerHTML = `
+            <button id="bulkDeleteButton" class="btn-danger">
+                <i class="fas fa-trash"></i> Seçili Grupları Sil
+            </button>
+        `;
+        groupList.parentNode.insertBefore(bulkDeleteContainer, groupList);
+    }
+
     // Grup sayılarını hesapla
     const groupCounts = channels.reduce((acc, ch) => {
         acc[ch.groupTitle] = (acc[ch.groupTitle] || 0) + 1;
@@ -3700,6 +3586,46 @@ function listChannelGroups() {
     // Tüm DOM manipülasyonlarını tek seferde yap
     groupList.innerHTML = '';
     groupList.appendChild(fragment);
+
+    // Event delegation for group actions
+    groupList.addEventListener('click', (e) => {
+        const viewButton = e.target.closest('.view-channels');
+        const checkbox = e.target.closest('.group-checkbox');
+
+        if (viewButton) {
+            const selectedGroup = viewButton.getAttribute('data-group');
+            const filteredChannels = channels.filter(ch => ch.groupTitle === selectedGroup);
+            
+            groupList.style.display = 'none';
+            channelList.style.display = 'grid';
+            
+            if (paginationContainer) {
+                paginationContainer.style.display = 'flex';
+            }
+            
+            if (groupFilter) {
+                groupFilter.value = selectedGroup;
+            }
+            
+            updateChannelList(filteredChannels, 0);
+        } else if (checkbox) {
+            const group = checkbox.getAttribute('data-group');
+            if (checkbox.checked) {
+                selectedGroups.add(group);
+            } else {
+                selectedGroups.delete(group);
+            }
+            
+            // Show/hide bulk delete button based on selection
+            bulkDeleteContainer.style.display = selectedGroups.size > 0 ? 'block' : 'none';
+        }
+    });
+
+    // Add bulk delete button click handler
+    const bulkDeleteButton = document.getElementById('bulkDeleteButton');
+    if (bulkDeleteButton) {
+        bulkDeleteButton.onclick = bulkDeleteGroups;
+    }
 
     // Event delegation kullanarak tek bir event listener ekle
     groupList.addEventListener('click', (e) => {
@@ -3774,12 +3700,19 @@ document.querySelector('.section-header:first-child h2').addEventListener('click
 });
 
 // Kanal grubu kartı oluşturma
+// Selected groups for bulk operations
+let selectedGroups = new Set();
+
 function createGroupCard(group) {
     const groupInfo = getGroupInfo(group); // Grup simgesi ve rengi
     const channelCount = channels.filter(ch => ch.groupTitle === group).length;
+    const isSelected = selectedGroups.has(group);
     
     return `
         <div class="group-card" style="border-left: 5px solid ${groupInfo.color};">
+            <div class="group-select">
+                <input type="checkbox" class="group-checkbox" data-group="${group}" ${isSelected ? 'checked' : ''}>
+            </div>
             <h3>
                 <i class="${groupInfo.icon}" style="color: ${groupInfo.color};"></i> ${group}
             </h3>
@@ -3796,6 +3729,100 @@ function createGroupCard(group) {
             </div>
         </div>
     `;
+}
+
+function bulkDeleteGroups() {
+    if (selectedGroups.size === 0) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal delete-group-modal';
+    
+    const affectedChannels = channels.filter(ch => selectedGroups.has(ch.groupTitle)).length;
+    const remainingGroups = [...new Set(channels.map(ch => ch.groupTitle))]
+        .filter(g => !selectedGroups.has(g));
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash"></i> Kanal Gruplarını Sil</h3>
+                <button class="close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>${selectedGroups.size}</strong> grubu silmek istediğinizden emin misiniz?</p>
+                <p>Bu gruplarda toplam ${affectedChannels} kanal bulunuyor.</p>
+                
+                <div class="delete-options">
+                    <div class="option">
+                        <input type="radio" name="deleteOption" id="deleteAll" value="all" checked>
+                        <label for="deleteAll">Grupları ve tüm kanalları sil</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="deleteOption" id="keepChannels" value="keep">
+                        <label for="keepChannels">Sadece grupları sil, kanalları sakla</label>
+                    </div>
+                </div>
+                
+                <div class="move-channels-option" style="display: none;">
+                    <p>Kanalları taşımak istediğiniz grubu seçin:</p>
+                    <select id="targetGroup" class="form-control">
+                        <option value="">Grupsuz Bırak</option>
+                        ${remainingGroups.map(group => `<option value="${group}">${group}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">İptal</button>
+                <button class="btn-delete">Sil</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const closeBtn = modal.querySelector('.close');
+    const cancelBtn = modal.querySelector('.btn-cancel');
+    const deleteBtn = modal.querySelector('.btn-delete');
+    const keepChannelsRadio = modal.querySelector('#keepChannels');
+    const moveChannelsOption = modal.querySelector('.move-channels-option');
+    
+    keepChannelsRadio.onchange = () => {
+        moveChannelsOption.style.display = keepChannelsRadio.checked ? 'block' : 'none';
+    };
+    
+    closeBtn.onclick = () => modal.remove();
+    cancelBtn.onclick = () => modal.remove();
+    modal.onclick = e => {
+        if (e.target === modal) modal.remove();
+    };
+    
+    deleteBtn.onclick = () => {
+        const deleteOption = modal.querySelector('input[name="deleteOption"]:checked').value;
+        const targetGroup = modal.querySelector('#targetGroup').value;
+        
+        if (deleteOption === 'all') {
+            channels = channels.filter(ch => !selectedGroups.has(ch.groupTitle));
+            showNotification(`${selectedGroups.size} grup ve tüm kanalları silindi.`, 'success');
+        } else {
+            channels.forEach(ch => {
+                if (selectedGroups.has(ch.groupTitle)) {
+                    ch.groupTitle = targetGroup;
+                }
+            });
+            showNotification(`${selectedGroups.size} grup silindi, kanallar ${targetGroup || 'grupsuz olarak'} kaydedildi.`, 'success');
+        }
+        
+        addNotification('Kanal Grupları Silme', `${selectedGroups.size} grup silindi.`);
+        selectedGroups.clear();
+        
+        // Hide bulk delete container if there are no groups left
+        const bulkDeleteContainer = document.getElementById('bulkDeleteContainer');
+        if (bulkDeleteContainer) {
+            bulkDeleteContainer.style.display = 'none';
+        }
+        
+        listChannelGroups();
+        modal.remove();
+    };
 }
 
 // Bildirim yönetimi için global değişkenler

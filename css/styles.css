@@ -52,7 +52,7 @@ body.dark-theme {
     --bg-color: #1a1a1a;
     --bg-secondary: #2d2d2d;
     --text-color: #ffffff;
-    --text-muted: #999999;
+    --text-muted: #e0e0e0;
     --border-color: #404040;
     --hover-color: #3d3d3d;
 }
@@ -1885,6 +1885,37 @@ body.dark-theme {
     flex-direction: column;
 }
 
+.patronlinktest .modal-content {
+    width: 45% !important;
+    height: 97vh !important;
+    max-height: 97vh !important;
+    max-width: 85% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.patronlinktest .modal-header {
+    padding: 15px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.patronlinktest .video-test-container {
+    flex: 1 !important;
+    position: relative !important;
+    background: #000 !important;
+}
+
+.patronlinktest .video-test-container iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
 .video-test-modal .modal-header {
     padding: 15px;
     border-bottom: 1px solid var(--border-color);
@@ -2636,19 +2667,99 @@ select#sortFilter option[value="favorites"] {
 }
 
 .group-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    margin: 10px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.group-select {
+    margin-right: 15px;
+}
+
+.group-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+#bulkDeleteContainer {
+    text-align: right;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.delete-group-modal .modal-content {
+    max-width: 500px;
+}
+
+.delete-options {
+    margin: 20px 0;
+}
+
+.delete-options .option {
+    margin: 10px 0;
+}
+
+.move-channels-option {
+    margin-top: 15px;
     padding: 15px;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.move-channels-option select {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-color);
+}
+
+.dark-theme .move-channels-option select {
+    background: var(--dark-sidebar);
+    border-color: var(--dark-border);
+    color: var(--dark-text);
+}
+
+.dark-theme .move-channels-option select option {
+    background: var(--dark-sidebar);
+    color: var(--dark-text);
 }
 
 .group-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.group-card .group-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .group-card h3 {
@@ -2661,20 +2772,22 @@ select#sortFilter option[value="favorites"] {
 
 .group-card .group-actions {
     display: flex;
-    padding-top: 10px;
-    gap: 8px;
-    width: 100%;
-    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
 }
 
-.group-card button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s;
+.group-card .view-channels,
+.group-card .edit-group,
+.group-card .delete-group {
+    padding: 6px 12px;
+    border-radius: 6px;
     font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .group-card .view-channels {
