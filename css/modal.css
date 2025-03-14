@@ -237,3 +237,79 @@
 .dark-theme .modal-body::-webkit-scrollbar-track {
     background: var(--dark-sidebar);
 }
+
+
+
+
+/* Author List Button and Dropdown Styles */
+.author-list-btn {
+    margin-right: 20%;
+    padding: 4px 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.author-list-btn:hover {
+    background: var(--primary-hover);
+}
+
+.author-list-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 5px;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.author-list-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    color: var(--text-color);
+}
+
+.author-list-item:hover {
+    background: var(--bg-secondary);
+}
+
+.dark-theme .author-list-dropdown {
+    background: var(--dark-sidebar);
+    border-color: var(--dark-border);
+}
+
+.dark-theme .author-list-item:hover {
+    background: var(--dark-bg);
+}
+
+.modal-header .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.modal-header .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    position: relative;
+    width: 100%;
+    justify-content: flex-end;
+}
