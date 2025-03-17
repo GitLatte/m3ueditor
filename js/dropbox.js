@@ -1,10 +1,10 @@
 // Dropbox API integration
-const DROPBOX_APP_KEY = 'kz3pysv4ut0zc5e'; // Replace with your Dropbox App Key
-const DROPBOX_REDIRECT_URI = 'https://gitlatte.github.io/m3ueditor/index.html';
+const DROPBOX_APP_KEY = 'h5ap9ircbsg79z5'; // Replace with your Dropbox App Key
+const DROPBOX_REDIRECT_URI = window.location.origin + window.location.pathname;
 
 // Check if app key is configured
 function isDropboxConfigured() {
-    return DROPBOX_APP_KEY !== 'kz3pysv4ut0zc5e';
+    return DROPBOX_APP_KEY !== 'h5ap9ircbsg79z5';
 }
 
 class DropboxIntegration {
