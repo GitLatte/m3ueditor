@@ -2225,10 +2225,10 @@ function showStatistics() {
                                                             <span class="channel-group">${ch.groupTitle || 'Grupsuz'}</span>
                                                         </div>
                                                         <div class="channel-actions">
-                                                            <button class="btn-edit" onclick="event.stopPropagation(); showChannelModal(channels[${channels.indexOf(ch)}])">
+                                                            <button class="btn-edit" onclick="event.stopPropagation(); showChannelModal(channels.find(c => c.channelUrl === '${ch.channelUrl}' && c.tvgName === '${ch.tvgName}'))">
                                                                 <i class="fas fa-edit"></i> Düzenle
                                                             </button>
-                                                            <button class="btn-delete" onclick="event.stopPropagation(); if(confirm('Bu kanalı silmek istediğinizden emin misiniz?')) { channels.splice(${channels.indexOf(ch)}, 1); updateChannelList(); closeModal(); showDuplicateUrlReport(); }">
+                                                            <button class="btn-delete" onclick="event.stopPropagation(); if(confirm('Bu kanalı silmek istediğinizden emin misiniz?')) { const idx = channels.findIndex(c => c.channelUrl === '${ch.channelUrl}' && c.tvgName === '${ch.tvgName}'); if(idx !== -1) { channels.splice(idx, 1); updateChannelList(); closeModal(); showDuplicateUrlReport(); } }">
                                                                 <i class="fas fa-trash"></i> Sil
                                                             </button>
                                                         </div>
