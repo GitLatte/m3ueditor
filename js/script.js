@@ -426,7 +426,7 @@ function previewStream(url, channelName) {
                     </div>
                     <div class="stream-health">
                         <div class="health-indicator"></div>
-                        <div class="buffer-info">Ara Belleğe Alınan: <span>0 saniye</span></div>
+                        <div class="buffer-info">Belleğe Alınan: <span>0 saniye</span></div>
                         <div class="bitrate-info">Veri Kullanımı: <span>0 Mbps</span></div>
                     </div>
                 </div>
