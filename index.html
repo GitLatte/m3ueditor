@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/editor-tutorial.css">
     <link rel="stylesheet" href="css/modal.css">
     <link rel="stylesheet" href="css/voice-tooltip.css">
+    <link rel="stylesheet" href="css/stream-preview.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
@@ -164,9 +165,15 @@
                         <i class="fas fa-code"></i>
                         <span>Metin Editörü</span>
                     </div>
-                    <div class="action-card" data-action="save">
-                        <i class="fas fa-save"></i>
-                        <span>Kaydet</span>
+                    <div class="action-card load-options">
+                        <div class="load-button" data-action="save" onclick="saveM3U()">
+                            <i class="fas fa-save"></i>
+                            <span>Kaydet</span>
+                        </div>
+                        <div class="load-button" data-action="dropbox-save" onclick="uploadToDropbox()">
+                            <i class="fab fa-dropbox"></i>
+                            <span>Dropbox'a Kaydet</span>
+                        </div>
                     </div>
                     <div class="action-card btn-favorites">
                         <i class="fas fa-heart"></i>
@@ -189,6 +196,8 @@
                                 <option value="az">Alfabetik A'dan Z'ye</option>
                                 <option value="za">Alfabetik Z'den A'ya</option>
                                 <option value="logo">Logosuzlar Üstte</option>
+                                <option value="active">Aktif Kanallar</option>
+                                <option value="inactive">Yanıt Vermeyenler</option>
                             </select>
                         </div>
                         <div class="search-bar filter-container" style="display: none;">
@@ -278,6 +287,7 @@
     </div>
     <script src="js/no-results.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/dropbox.js"></script>
     <script src="js/tutorial.js"></script>
     <script src="js/editor-tutorial.js"></script>
     <script src="js/epg.js"></script>

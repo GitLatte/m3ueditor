@@ -122,11 +122,33 @@ function createChannelCard(channel, index, filteredChannels = null) {
     const isFavorite = localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null;
     const favoriteIconClass = isFavorite ? 'fas fa-heart' : 'far fa-heart';
 
+    // Kanal sağlık durumu kontrolü
+    const healthStatus = localStorage.getItem(`health_${encodeURIComponent(channel.channelUrl)}`) || 'unknown';
+    const healthTitle = {
+        'excellent': 'Kanal Aktif',
+        'poor': 'Kanal Yanıt Vermiyor',
+        'unknown': 'Durum Kontrol Ediliyor'
+    }[healthStatus];
+
+    // Toplu seçim için checkbox ekle
+    const checkbox = `<input type="checkbox" class="channel-checkbox" data-index="${index}">`;
+
+    // Toplu silme butonu ekle (ilk kart için)
+    const deleteSelectedButton = index === 0 ? `
+        <div id="channelBulkDeleteContainer" style="display:none">
+            <button class="btn-danger delete-selected" onclick="deleteSelectedChannels()">
+                <i class="fas fa-trash"></i> Seçili Kanalları Sil
+            </button>
+        </div>
+    ` : '';
+
     // Custom headers göstergesi
     const hasCustomHeaders = channel.customHeaders && Object.keys(channel.customHeaders).length > 0;
 
     return `
-        <div class="channel-card" data-id="${index}">
+        ${deleteSelectedButton}
+        <div class="channel-card" data-id="${index}" data-channel-url="${channel.channelUrl}">
+            ${checkbox}
             <span class="order-number">${index + 1}</span>
             <div class="channel-header">
                 <img src="${displayLogo}" 
@@ -134,7 +156,7 @@ function createChannelCard(channel, index, filteredChannels = null) {
                      class="channel-logo"
                      onerror="this.src='${BROKEN_LOGO}'">
                 <div class="channel-info">
-                    <h3>${channel.tvgName}</h3>
+                    <h3>${channel.tvgName} <div class="health-indicator ${healthStatus}" title="${healthTitle}"></div></h3>
                     <div class="channel-group">
                         <i class="${groupInfo.icon}" style="color: ${groupInfo.color};"></i> ${channel.groupTitle}
                     </div>
@@ -178,6 +200,40 @@ function updateChannelList(filteredChannels = null, page = null) {
     const groupFilter = document.getElementById('groupFilter');
     const paginationContainer = document.getElementById('channelPagination');
 
+    // Add bulk delete container if it doesn't exist
+    let bulkDeleteContainer = document.getElementById('channelBulkDeleteContainer');
+    if (!bulkDeleteContainer) {
+        bulkDeleteContainer = document.createElement('div');
+        bulkDeleteContainer.id = 'channelBulkDeleteContainer';
+        bulkDeleteContainer.style.display = 'none';
+        bulkDeleteContainer.innerHTML = `
+            <button id="channelBulkDeleteButton" class="btn-danger" onclick="deleteSelectedChannels()">
+                <i class="fas fa-trash"></i> Seçili Kanalları Sil
+            </button>
+        `;
+        channelList.parentNode.insertBefore(bulkDeleteContainer, channelList);
+    }
+
+    // Checkbox değişikliklerini dinle
+    function handleCheckboxChange() {
+        const selectedCount = document.querySelectorAll('.channel-checkbox:checked').length;
+        const bulkDeleteContainer = document.getElementById('channelBulkDeleteContainer');
+        if (bulkDeleteContainer) {
+            bulkDeleteContainer.style.display = selectedCount > 0 ? 'block' : 'none';
+        }
+    }
+
+    // Checkbox event listener'ları ekle
+    setTimeout(() => {
+        document.querySelectorAll('.channel-checkbox').forEach(checkbox => {
+            // Remove existing event listeners to prevent duplicates
+            checkbox.removeEventListener('change', handleCheckboxChange);
+            checkbox.addEventListener('change', handleCheckboxChange);
+        });
+        // Initial check for selected channels
+        handleCheckboxChange();
+    }, 100);
+
     // Store current group filter value before any updates
     const currentGroupFilter = groupFilter ? groupFilter.value : '';
 
@@ -208,11 +264,15 @@ function updateChannelList(filteredChannels = null, page = null) {
         }
     }
 
-    // Update current channels and apply favorites
+    // Update current channels and apply favorites and health status
     currentChannels = displayChannels.map(channel => ({
         ...channel,
-        isFavorite: localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null
+        isFavorite: localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null,
+        healthStatus: localStorage.getItem(`health_${encodeURIComponent(channel.channelUrl)}`) || 'unknown'
     }));
+
+    // Start health checks for visible channels
+    startHealthCheck(currentChannels);
 
     // Apply sorting
     const sortType = sortFilter ? sortFilter.value : 'default';
@@ -325,6 +385,31 @@ function attachEventListenersToVisibleChannels(startIndex) {
 
 
 // Video oynatıcı modalı
+// Channel health check function
+async function checkChannelHealth(channel) {
+    try {
+        const response = await fetch(channel.channelUrl, { method: 'HEAD', timeout: 5000 });
+        const status = response.ok ? 'excellent' : 'poor';
+        localStorage.setItem(`health_${encodeURIComponent(channel.channelUrl)}`, status);
+        return status;
+    } catch (error) {
+        localStorage.setItem(`health_${encodeURIComponent(channel.channelUrl)}`, 'poor');
+        return 'poor';
+    }
+}
+
+// Start health checks for channels
+function startHealthCheck(channels) {
+    channels.forEach(async (channel) => {
+        const status = await checkChannelHealth(channel);
+        const healthIndicator = document.querySelector(`[data-channel-url="${channel.channelUrl}"] .health-indicator`);
+        if (healthIndicator) {
+            healthIndicator.className = `health-indicator ${status}`;
+            healthIndicator.title = status === 'excellent' ? 'Kanal Aktif' : 'Kanal Yanıt Vermiyor';
+        }
+    });
+}
+
 function previewStream(url, channelName) {
     const modal = document.createElement('div');
     modal.className = 'modal stream-preview-modal';
@@ -335,8 +420,15 @@ function previewStream(url, channelName) {
                 <button class="close">&times;</button>
             </div>
             <div class="video-container">
-                <div class="resolution-info">
-                    <span></span>
+                <div class="stream-info">
+                    <div class="resolution-info">
+                        <span></span>
+                    </div>
+                    <div class="stream-health">
+                        <div class="health-indicator"></div>
+                        <div class="buffer-info">Ara Belleğe Alınan: <span>0 saniye</span></div>
+                        <div class="bitrate-info">Veri Kullanımı: <span>0 Mbps</span></div>
+                    </div>
                 </div>
                 <video id="player" controls crossorigin="anonymous" playsinline></video>
             </div>
@@ -360,13 +452,47 @@ function previewStream(url, channelName) {
 
     // HLS.js ile video oynatıcıyı başlat
     if (Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({
+            debug: false,
+            enableWorker: true,
+            lowLatencyMode: true
+        });
         hls.loadSource(url);
         hls.attachMedia(video);
 
+        // Stream sağlığı izleme
+        const healthIndicator = modal.querySelector('.health-indicator');
+        const bufferInfo = modal.querySelector('.buffer-info span');
+        const bitrateInfo = modal.querySelector('.bitrate-info span');
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
             video.play();
         });
+
+        // Stream sağlığı ve performans izleme
+        hls.on(Hls.Events.FRAG_BUFFERED, (event, data) => {
+            const buffer = video.buffered;
+            if (buffer.length > 0) {
+                const buffered = buffer.end(buffer.length - 1) - video.currentTime;
+                bufferInfo.textContent = `${buffered.toFixed(1)}s`;
+            }
+
+            const bitrate = hls.bandwidthEstimate / 1000000; // Convert to Mbps
+            bitrateInfo.textContent = `${bitrate.toFixed(2)} Mbps`;
+
+            // Stream sağlık durumu göstergesi
+            if (bitrate > 5) {
+                healthIndicator.className = 'health-indicator excellent';
+                healthIndicator.title = 'Mükemmel Bağlantı';
+            } else if (bitrate > 2) {
+                healthIndicator.className = 'health-indicator good';
+                healthIndicator.title = 'İyi Bağlantı';
+            } else {
+                healthIndicator.className = 'health-indicator poor';
+                healthIndicator.title = 'Zayıf Bağlantı';
+            }
+        });
+
+
 
         // Çözünürlük bilgisini göster
         video.addEventListener('loadedmetadata', () => {
@@ -1637,7 +1763,14 @@ function saveChannel(index) {
         }
 
     } else {
-        channels.push(channelData);
+        // Find the last index of a channel with the same group
+        const lastGroupIndex = channels.map((ch, idx) => ({ idx, group: ch.groupTitle }))
+            .filter(ch => ch.group === channelData.groupTitle)
+            .reduce((last, current) => current.idx > last ? current.idx : last, -1);
+        
+        // Insert after the last channel of the same group, or at the end if no matching group found
+        const insertIndex = lastGroupIndex + 1;
+        channels.splice(insertIndex, 0, channelData);
         showNotification('Yeni kanal eklendi', 'success');
         notifications.push(`"${channelData.tvgName}" kanalı eklendi`);
     }
@@ -1988,6 +2121,19 @@ function showStatistics() {
     const smallestGroup = Object.entries(groupCounts)
         .reduce((prev, current) => (prev[1] < current[1] ? prev : current), ['', Infinity]);
 
+    // Tekrarlanan URL'leri hesapla
+    const urlCounts = {};
+    const duplicateUrls = {};
+    channels.forEach(channel => {
+        if (channel.channelUrl) {
+            urlCounts[channel.channelUrl] = (urlCounts[channel.channelUrl] || 0) + 1;
+            if (urlCounts[channel.channelUrl] > 1) {
+                duplicateUrls[channel.channelUrl] = channels.filter(ch => ch.channelUrl === channel.channelUrl);
+            }
+        }
+    });
+    const duplicateUrlCount = Object.keys(duplicateUrls).length;
+
     // Get list source name based on how it was loaded
     let listSourceName = 'Henüz bir liste yüklenmedi';
     if (currentFileName) {
@@ -2008,45 +2154,91 @@ function showStatistics() {
                         <span>${listSourceName}</span>
                     </div>
                 </div>
+                <div class="tab-container">
+                    <button class="tab-button active" data-tab="stats">İstatistikler</button>
+                    <button class="tab-button" data-tab="reports">Rapor</button>
+                </div>
                 <button class="close">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="stats-grid">
-                    <div class="stat-card highlight">
-                        <i class="fas fa-tv"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">${stats.totalChannels}</span>
-                            <span class="stat-label">Toplam Kanal</span>
+                <div class="tab-content" id="stats-tab" style="display: block;">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight">
+                            <i class="fas fa-tv"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.totalChannels}</span>
+                                <span class="stat-label">Toplam Kanal</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-layer-group"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.totalGroups}</span>
+                                <span class="stat-label">Grup Sayısı</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users-slash"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.noGroupChannels}</span>
+                                <span class="stat-label">Grubu Olmayan Kanallar</span>
+                            </div>
+                        </div>
+                        <div class="stat-card large">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">${largestGroup[0]}</span>
+                                <span class="stat-label">En Büyük Grup</span>
+                                <span class="stat-sublabel">${largestGroup[1]} kanal</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">${smallestGroup[0]}</span>
+                                <span class="stat-label">En Az Kanala Sahip Grup</span>
+                                <span class="stat-sublabel">${smallestGroup[1]} kanal</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-layer-group"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">${stats.totalGroups}</span>
-                            <span class="stat-label">Grup Sayısı</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-users-slash"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">${stats.noGroupChannels}</span>
-                            <span class="stat-label">Grubu Olmayan Kanallar</span>
-                        </div>
-                    </div>
-                    <div class="stat-card large">
-                        <i class="fas fa-users"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">${largestGroup[0]}</span>
-                            <span class="stat-label">En Büyük Grup</span>
-                            <span class="stat-sublabel">${largestGroup[1]} kanal</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">${smallestGroup[0]}</span>
-                            <span class="stat-label">En Az Kanala Sahip Grup</span>
-                            <span class="stat-sublabel">${smallestGroup[1]} kanal</span>
+                </div>
+                <div class="tab-content" id="reports-tab" style="display: none;">
+                    <div class="duplicate-urls-section">
+                        <h4><i class="fas fa-copy"></i> Tekrarlanan URL'ler</h4>
+                        <div class="duplicate-urls-info">
+                            ${duplicateUrlCount > 0 ? `
+                                <p>Listede ${duplicateUrlCount} adet tekrarlanan URL bulundu.</p>
+                                <div class="duplicate-urls-list">
+                                    ${Object.entries(duplicateUrls).map(([url, channels]) => `
+                                        <div class="duplicate-url-item">
+                                            <div class="url-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                                <i class="fas fa-chevron-right"></i>
+                                                <span class="url-count">${channels.length} Kanal</span>
+                                                <span class="url-text">${url}</span>
+                                            </div>
+                                            <div class="channels-list">
+                                                ${channels.map(ch => `
+                                                    <div class="channel-item">
+                                                        <img src="${ch.tvgLogo || 'images/default-channel.png'}" onerror="this.src='images/broken-image.svg'">
+                                                        <div class="channel-info">
+                                                            <span class="channel-name">${ch.tvgName}</span>
+                                                            <span class="channel-group">${ch.groupTitle || 'Grupsuz'}</span>
+                                                        </div>
+                                                        <div class="channel-actions">
+                                                            <button class="btn-edit" onclick="event.stopPropagation(); showChannelModal(channels[${channels.indexOf(ch)}])">
+                                                                <i class="fas fa-edit"></i> Düzenle
+                                                            </button>
+                                                            <button class="btn-delete" onclick="event.stopPropagation(); if(confirm('Bu kanalı silmek istediğinizden emin misiniz?')) { channels.splice(${channels.indexOf(ch)}, 1); updateChannelList(); closeModal(); showDuplicateUrlReport(); }">
+                                                                <i class="fas fa-trash"></i> Sil
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<p>Listede tekrarlanan URL bulunamadı.</p>'}
                         </div>
                     </div>
                 </div>
@@ -2055,6 +2247,25 @@ function showStatistics() {
     `;
     
     document.body.appendChild(modal);
+    
+    // Tab switching functionality
+    const tabButtons = modal.querySelectorAll('.tab-button');
+    const tabContents = modal.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            
+            // Update active button
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Show selected tab content
+            tabContents.forEach(content => {
+                content.style.display = content.id === `${tabId}-tab` ? 'block' : 'none';
+            });
+        });
+    });
     
     modal.querySelector('.close').onclick = closeModal;
     modal.onclick = e => {
@@ -2794,12 +3005,20 @@ function reattachEventListeners() {
 
 // Kanal düzenleme fonksiyonu
 function editChannel(index) {
-    // Find the channel in the global channels array using the URL as a unique identifier
+    // Get the channel from currentChannels array
     const displayedChannel = currentChannels[index];
     if (!displayedChannel) return;
     
-    // Find the actual index in the global channels array
-    const globalIndex = channels.findIndex(ch => ch.channelUrl === displayedChannel.channelUrl);
+    // Find the actual index in the global channels array by matching all properties
+    const globalIndex = channels.findIndex(ch => 
+        ch.tvgName === displayedChannel.tvgName &&
+        ch.tvgId === displayedChannel.tvgId &&
+        ch.tvgLogo === displayedChannel.tvgLogo &&
+        ch.groupTitle === displayedChannel.groupTitle &&
+        ch.channelUrl === displayedChannel.channelUrl &&
+        ch.httpReferrer === displayedChannel.httpReferrer &&
+        ch.userAgent === displayedChannel.userAgent
+    );
     if (globalIndex === -1) return;
     
     showChannelModal(channels[globalIndex]);
@@ -2817,9 +3036,67 @@ function addChannel() {
         userAgent: ''
     };
     
-    showChannelModal(null); // Boş kanal modalını aç
-    updateChannelList();
-    updateCounts();
+    // Show the modal first to get channel info
+    showChannelModal(null, (savedChannel) => {
+        if (savedChannel) {
+            // Find the last index of a channel with the same group
+            const lastGroupIndex = channels.map((ch, idx) => ({ idx, group: ch.groupTitle }))
+                .filter(ch => ch.group === savedChannel.groupTitle)
+                .reduce((last, current) => current.idx > last ? current.idx : last, -1);
+            
+            // Insert after the last channel of the same group, or at the end if no matching group found
+            const insertIndex = lastGroupIndex + 1;
+            channels.splice(insertIndex, 0, savedChannel);
+            
+            updateChannelList();
+            updateCounts();
+            updateUnsavedChanges(true);
+        }
+    });
+}
+
+// Seçili kanalları silme fonksiyonu
+function deleteSelectedChannels() {
+    const selectedChannels = document.querySelectorAll('.channel-checkbox:checked');
+    if (selectedChannels.length === 0) return;
+
+    if (confirm(`${selectedChannels.length} kanalı silmek istediğinizden emin misiniz?`)) {
+        const removedChannels = [];
+        selectedChannels.forEach(checkbox => {
+            const index = parseInt(checkbox.getAttribute('data-index'));
+            if (!isNaN(index) && index >= 0 && index < channels.length) {
+                removedChannels.push(channels[index]);
+            }
+        });
+
+        // Kanalları tersten sil (indeks kayması olmaması için)
+        removedChannels.sort((a, b) => channels.indexOf(b) - channels.indexOf(a));
+        removedChannels.forEach(channel => {
+            const index = channels.indexOf(channel);
+            if (index !== -1) {
+                channels.splice(index, 1);
+            }
+        });
+
+        // Mevcut filtreleme ve sayfalama durumunu koru
+        const currentFilters = {
+            group: document.getElementById('groupFilter')?.value || 'all',
+            sort: document.getElementById('sortFilter')?.value || 'default'
+        };
+
+        // Filtrelenmiş kanalları güncelle
+        let filteredChannels = channels;
+        if (currentFilters.group !== 'all') {
+            filteredChannels = channels.filter(ch => ch.groupTitle === currentFilters.group);
+        }
+
+        updateChannelList(filteredChannels, currentPage);
+        updateUnsavedChanges(true);
+        showNotification(`${selectedChannels.length} kanal silindi`, 'success');
+
+        // Bildirim ekle
+        addNotification('Toplu Kanal Silme', `${selectedChannels.length} kanal silindi`);
+    }
 }
 
 // M3U içeriğini doğrula
@@ -3163,13 +3440,47 @@ function openVideoUrlTest() {
 
     // HLS.js ile video oynatıcıyı başlat
     if (Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({
+            debug: false,
+            enableWorker: true,
+            lowLatencyMode: true
+        });
         hls.loadSource(url);
         hls.attachMedia(video);
 
+        // Stream sağlığı izleme
+        const healthIndicator = modal.querySelector('.health-indicator');
+        const bufferInfo = modal.querySelector('.buffer-info span');
+        const bitrateInfo = modal.querySelector('.bitrate-info span');
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
             video.play();
         });
+
+        // Stream sağlığı ve performans izleme
+        hls.on(Hls.Events.FRAG_BUFFERED, (event, data) => {
+            const buffer = video.buffered;
+            if (buffer.length > 0) {
+                const buffered = buffer.end(buffer.length - 1) - video.currentTime;
+                bufferInfo.textContent = `${buffered.toFixed(1)}s`;
+            }
+
+            const bitrate = hls.bandwidthEstimate / 1000000; // Convert to Mbps
+            bitrateInfo.textContent = `${bitrate.toFixed(2)} Mbps`;
+
+            // Stream sağlık durumu göstergesi
+            if (bitrate > 5) {
+                healthIndicator.className = 'health-indicator excellent';
+                healthIndicator.title = 'Mükemmel Bağlantı';
+            } else if (bitrate > 2) {
+                healthIndicator.className = 'health-indicator good';
+                healthIndicator.title = 'İyi Bağlantı';
+            } else {
+                healthIndicator.className = 'health-indicator poor';
+                healthIndicator.title = 'Zayıf Bağlantı';
+            }
+        });
+
+
 
         // Çözünürlük bilgisini göster
         video.addEventListener('loadedmetadata', () => {
@@ -3419,6 +3730,18 @@ function updateGroupFilter() {
 function sortChannels(channels, sortType) {
     const channelsCopy = [...channels]; // Orijinal diziyi değiştirmemek için kopya oluştur
     switch (sortType) {
+        case 'active':
+            return channelsCopy.sort((a, b) => {
+                if (a.healthStatus === 'excellent' && b.healthStatus !== 'excellent') return -1;
+                if (a.healthStatus !== 'excellent' && b.healthStatus === 'excellent') return 1;
+                return a.tvgName.localeCompare(b.tvgName);
+            });
+        case 'inactive':
+            return channelsCopy.sort((a, b) => {
+                if (a.healthStatus === 'poor' && b.healthStatus !== 'poor') return -1;
+                if (a.healthStatus !== 'poor' && b.healthStatus === 'poor') return 1;
+                return a.tvgName.localeCompare(b.tvgName);
+            });
         case 'favorites':
             return channelsCopy.sort((a, b) => {
                 if (a.isFavorite && !b.isFavorite) return -1;
