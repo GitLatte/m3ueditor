@@ -3060,7 +3060,7 @@ function deleteSelectedChannels() {
     const selectedChannels = document.querySelectorAll('.channel-checkbox:checked');
     if (selectedChannels.length === 0) return;
 
-    if (confirm(`${selectedChannels.length} kanalı silmek istediğinizden emin misiniz?`)) {
+    if (confirm(`Bu ${selectedChannels.length} kanalı silmek üzeresiniz, emin misiniz?`)) {
         const removedChannels = [];
         selectedChannels.forEach(checkbox => {
             const index = parseInt(checkbox.getAttribute('data-index'));
