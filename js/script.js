@@ -3882,6 +3882,12 @@ function listChannelGroups() {
         bulkDeleteContainer.id = 'bulkDeleteContainer';
         bulkDeleteContainer.style.display = 'none';
         bulkDeleteContainer.innerHTML = `
+            <button id="selectAllGroupsButton" class="btn-select-all">
+                <i class="fa-solid fa-check-double"></i> Tüm Grupları Seç
+            </button>
+            <button id="clearAllSelectionsButton" class="btn-clear-selection">
+                <i class="fas fa-square"></i> Tüm Seçimleri Kaldır
+            </button>
             <button id="bulkDeleteButton" class="btn-danger">
                 <i class="fas fa-trash"></i> Seçili Grupları Sil
             </button>
@@ -3944,10 +3950,36 @@ function listChannelGroups() {
         }
     });
 
-    // Add bulk delete button click handler
+    // Add bulk action buttons click handlers
     const bulkDeleteButton = document.getElementById('bulkDeleteButton');
+    const selectAllButton = document.getElementById('selectAllGroupsButton');
+    const clearAllButton = document.getElementById('clearAllSelectionsButton');
+
     if (bulkDeleteButton) {
         bulkDeleteButton.onclick = bulkDeleteGroups;
+    }
+
+    if (selectAllButton) {
+        selectAllButton.onclick = () => {
+            const checkboxes = document.querySelectorAll('.group-checkbox');
+            checkboxes.forEach(checkbox => {
+                const group = checkbox.getAttribute('data-group');
+                checkbox.checked = true;
+                selectedGroups.add(group);
+            });
+            bulkDeleteContainer.style.display = 'block';
+        };
+    }
+
+    if (clearAllButton) {
+        clearAllButton.onclick = () => {
+            const checkboxes = document.querySelectorAll('.group-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            selectedGroups.clear();
+            bulkDeleteContainer.style.display = 'none';
+        };
     }
 
     // Event delegation kullanarak tek bir event listener ekle
