@@ -122,13 +122,7 @@ function createChannelCard(channel, index, filteredChannels = null) {
     const isFavorite = localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null;
     const favoriteIconClass = isFavorite ? 'fas fa-heart' : 'far fa-heart';
 
-    // Kanal sağlık durumu kontrolü
-    const healthStatus = localStorage.getItem(`health_${encodeURIComponent(channel.channelUrl)}`) || 'unknown';
-    const healthTitle = {
-        'excellent': 'Kanal Aktif',
-        'poor': 'Kanal Yanıt Vermiyor',
-        'unknown': 'Durum Kontrol Ediliyor'
-    }[healthStatus];
+
 
     // Toplu seçim için checkbox ekle
     const checkbox = `<input type="checkbox" class="channel-checkbox" data-index="${index}">`;
@@ -156,7 +150,7 @@ function createChannelCard(channel, index, filteredChannels = null) {
                      class="channel-logo"
                      onerror="this.src='${BROKEN_LOGO}'">
                 <div class="channel-info">
-                    <h3>${channel.tvgName} <div class="health-indicator ${healthStatus}" title="${healthTitle}"></div></h3>
+                    <h3>${channel.tvgName}</h3>
                     <div class="channel-group">
                         <i class="${groupInfo.icon}" style="color: ${groupInfo.color};"></i> ${channel.groupTitle}
                     </div>
@@ -184,6 +178,15 @@ function createChannelCard(channel, index, filteredChannels = null) {
             </div>
         </div>
     `;
+}
+
+// Checkbox değişikliklerini dinle
+function handleCheckboxChange() {
+    const selectedCount = document.querySelectorAll('.channel-checkbox:checked').length;
+    const bulkDeleteContainer = document.getElementById('channelBulkDeleteContainer');
+    if (bulkDeleteContainer) {
+        bulkDeleteContainer.style.display = selectedCount > 0 ? 'block' : 'none';
+    }
 }
 
 // Kanal listesini güncelleme
@@ -214,14 +217,8 @@ function updateChannelList(filteredChannels = null, page = null) {
         channelList.parentNode.insertBefore(bulkDeleteContainer, channelList);
     }
 
-    // Checkbox değişikliklerini dinle
-    function handleCheckboxChange() {
-        const selectedCount = document.querySelectorAll('.channel-checkbox:checked').length;
-        const bulkDeleteContainer = document.getElementById('channelBulkDeleteContainer');
-        if (bulkDeleteContainer) {
-            bulkDeleteContainer.style.display = selectedCount > 0 ? 'block' : 'none';
-        }
-    }
+    // Use the global handleCheckboxChange function
+    handleCheckboxChange();
 
     // Checkbox event listener'ları ekle
     setTimeout(() => {
@@ -264,15 +261,11 @@ function updateChannelList(filteredChannels = null, page = null) {
         }
     }
 
-    // Update current channels and apply favorites and health status
+    // Update current channels and apply favorites
     currentChannels = displayChannels.map(channel => ({
         ...channel,
-        isFavorite: localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null,
-        healthStatus: localStorage.getItem(`health_${encodeURIComponent(channel.channelUrl)}`) || 'unknown'
+        isFavorite: localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null
     }));
-
-    // Start health checks for visible channels
-    startHealthCheck(currentChannels);
 
     // Apply sorting
     const sortType = sortFilter ? sortFilter.value : 'default';
@@ -385,30 +378,7 @@ function attachEventListenersToVisibleChannels(startIndex) {
 
 
 // Video oynatıcı modalı
-// Channel health check function
-async function checkChannelHealth(channel) {
-    try {
-        const response = await fetch(channel.channelUrl, { method: 'HEAD', timeout: 5000 });
-        const status = response.ok ? 'excellent' : 'poor';
-        localStorage.setItem(`health_${encodeURIComponent(channel.channelUrl)}`, status);
-        return status;
-    } catch (error) {
-        localStorage.setItem(`health_${encodeURIComponent(channel.channelUrl)}`, 'poor');
-        return 'poor';
-    }
-}
 
-// Start health checks for channels
-function startHealthCheck(channels) {
-    channels.forEach(async (channel) => {
-        const status = await checkChannelHealth(channel);
-        const healthIndicator = document.querySelector(`[data-channel-url="${channel.channelUrl}"] .health-indicator`);
-        if (healthIndicator) {
-            healthIndicator.className = `health-indicator ${status}`;
-            healthIndicator.title = status === 'excellent' ? 'Kanal Aktif' : 'Kanal Yanıt Vermiyor';
-        }
-    });
-}
 
 function previewStream(url, channelName) {
     const modal = document.createElement('div');
@@ -548,7 +518,7 @@ function switchToProxyPlayer(url, button) {
         <iframe 
             src="https://gitlatte.github.io/videotest/?url=${encodeURIComponent(url)}" 
             frameborder="0" 
-            style="width: 100%; height: 500px;"
+            style="width: 100%; height: 100%;"
             allowfullscreen>
         </iframe>
     `;
@@ -1237,7 +1207,7 @@ function updateUnsavedChanges(value) {
 // (createNewM3U, loadM3U, saveM3U, addChannel, editChannel, deleteChannel vb.)
 
 // Kanal ekleme/düzenleme modalı
-function showChannelModal(channel = null) {
+function showChannelModal(channel = null, callback = null) {
     const isEditing = !!channel;
     const modal = document.createElement('div');
     modal.className = 'modal channel-modal';
@@ -1396,6 +1366,16 @@ function showChannelModal(channel = null) {
     `;
     
     document.body.appendChild(modal);
+
+    // Kapatma işleminden sonra callback'i çağır
+    const originalCloseModal = window.closeModal;
+    window.closeModal = function() {
+        originalCloseModal();
+        if (typeof callback === 'function') {
+            callback();
+        }
+        window.closeModal = originalCloseModal;
+    };
     
     // Grup seçimi olayı
     const groupSelect = modal.querySelector('select[name="groupTitle"]');
@@ -2225,10 +2205,10 @@ function showStatistics() {
                                                             <span class="channel-group">${ch.groupTitle || 'Grupsuz'}</span>
                                                         </div>
                                                         <div class="channel-actions">
-                                                            <button class="btn-edit" onclick="event.stopPropagation(); showChannelModal(channels.find(c => c.channelUrl === '${ch.channelUrl}' && c.tvgName === '${ch.tvgName}'))">
+                                                            <button class="btn-edit" onclick="event.stopPropagation(); const statsModal = document.querySelector('.stats-modal'); if (statsModal) { statsModal.style.display = 'none'; } showChannelModal(channels.find(c => c.channelUrl === '${ch.channelUrl.replace(/'/g, "\\'").replace(/"/g, '\\"')}' && c.tvgName === '${ch.tvgName.replace(/'/g, "\\'").replace(/"/g, '\\"')}'), () => { if (statsModal) { statsModal.style.display = 'block'; showStatistics(); } });">
                                                                 <i class="fas fa-edit"></i> Düzenle
                                                             </button>
-                                                            <button class="btn-delete" onclick="event.stopPropagation(); if(confirm('Bu kanalı silmek istediğinizden emin misiniz?')) { const idx = channels.findIndex(c => c.channelUrl === '${ch.channelUrl}' && c.tvgName === '${ch.tvgName}'); if(idx !== -1) { channels.splice(idx, 1); updateChannelList(); closeModal(); showDuplicateUrlReport(); } }">
+                                                            <button class="btn-delete" onclick="event.stopPropagation(); if(confirm('Bu kanalı silmek istediğinizden emin misiniz?')) { const idx = channels.findIndex(c => c.channelUrl === '${ch.channelUrl.replace(/'/g, "\\'").replace(/"/g, '\\"')}' && c.tvgName === '${ch.tvgName.replace(/'/g, "\\'").replace(/"/g, '\\"')}'); if(idx !== -1) { channels.splice(idx, 1); updateChannelList(); showStatistics(); } };">
                                                                 <i class="fas fa-trash"></i> Sil
                                                             </button>
                                                         </div>
@@ -3334,7 +3314,7 @@ function patr0nLinkTest() {
 
 // Ana konuya git fonksiyonu
 function anaKonuyaGit() {
-    window.open('https://www.sinetech.tr/konu/m3u-web-designer-m3u-duzenleyici.1/', '_blank');
+    window.open('https://forum.sinetech.tr/konu/m3u-web-editoru-by-latte.3217/', '_blank');
 }
 
 // Patr0n linkleri toplama sayfasına git fonksiyonu
