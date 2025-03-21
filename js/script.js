@@ -118,6 +118,22 @@ function createChannelCard(channel, index, filteredChannels = null) {
     // Grup simgesi ve rengi
     const groupInfo = getGroupInfo(channel.groupTitle);
 
+    // Yayın sağlığı kontrolü
+    checkStreamHealth(channel.channelUrl).then(health => {
+        const healthIndicator = document.querySelector(`[data-channel-url="${channel.channelUrl}"] .stream-health-indicator`);
+        if (healthIndicator) {
+            healthIndicator.className = `stream-health-indicator ${health.status}`;
+            healthIndicator.title = health.message;
+        }
+    });
+
+    // Yayın sağlığı göstergesi HTML'i
+    const streamHealthIndicator = `
+        <div class="stream-health-indicator pending" title="Yayın durumu kontrol ediliyor...">
+            <i class="fas fa-circle"></i>
+        </div>
+    `;
+
     // Favori kontrolü - URL'ye göre kontrol et
     const isFavorite = localStorage.getItem(`favorite_${encodeURIComponent(channel.channelUrl)}`) !== null;
     const favoriteIconClass = isFavorite ? 'fas fa-heart' : 'far fa-heart';
@@ -150,7 +166,10 @@ function createChannelCard(channel, index, filteredChannels = null) {
                      class="channel-logo"
                      onerror="this.src='${BROKEN_LOGO}'">
                 <div class="channel-info">
-                    <h3>${channel.tvgName}</h3>
+                    <div class="channel-title">
+                        <h3>${channel.tvgName}</h3>
+                        ${streamHealthIndicator}
+                    </div>
                     <div class="channel-group">
                         <i class="${groupInfo.icon}" style="color: ${groupInfo.color};"></i> ${channel.groupTitle}
                     </div>
@@ -180,12 +199,60 @@ function createChannelCard(channel, index, filteredChannels = null) {
     `;
 }
 
+// Yayın sağlığı kontrolü
+async function checkStreamHealth(url) {
+    try {
+        // İlk olarak doğrudan erişimi dene
+        const response = await fetch(url, { method: 'HEAD', timeout: 5000 });
+        if (response.ok) {
+            return {
+                status: 'excellent',
+                message: 'Yayın aktif ve erişilebilir durumda'
+            };
+        }
+    } catch (error) {
+        // Doğrudan erişim başarısız olduğunda proxy ile dene
+        try {
+            const proxyUrl = `https://vavoo.gitlatte.workers.dev/?url=${url}`;
+            const proxyResponse = await fetch(proxyUrl, { method: 'HEAD', timeout: 5000 });
+            
+            if (proxyResponse.ok) {
+                return {
+                    status: 'poor',
+                    message: 'Yayına erişilemiyor'
+                };
+            }
+        } catch (proxyError) {
+            // Proxy ile de erişilemedi
+            return {
+                status: 'vpn_required',
+                message: 'Yayın çok geç açılıyor ya da VPN gerektiriyor'
+            };
+        }
+    }
+    
+    // Her iki yöntemle de erişilemediğinde
+    return {
+        status: 'poor',
+        message: 'Yayına erişilemiyor'
+    };
+}
+
 // Checkbox değişikliklerini dinle
 function handleCheckboxChange() {
     const selectedCount = document.querySelectorAll('.channel-checkbox:checked').length;
     const bulkDeleteContainer = document.getElementById('channelBulkDeleteContainer');
+    const selectAllButton = document.getElementById('selectAllChannelsButton');
+    const clearSelectionsButton = document.getElementById('clearChannelSelectionsButton');
+    const bulkDeleteButton = document.getElementById('channelBulkDeleteButton');
+
     if (bulkDeleteContainer) {
-        bulkDeleteContainer.style.display = selectedCount > 0 ? 'block' : 'none';
+        const hasChannels = channels.length > 0;
+        const hasSelectedChannels = selectedCount > 0;
+        bulkDeleteContainer.style.display = hasChannels ? 'block' : 'none';
+        if (selectAllButton) selectAllButton.style.display = hasSelectedChannels ? 'inline-block' : 'none';
+        if (clearSelectionsButton) clearSelectionsButton.style.display = hasSelectedChannels ? 'inline-block' : 'none';
+        if (bulkDeleteButton) bulkDeleteButton.style.display = hasSelectedChannels ? 'inline-block' : 'none';
     }
 }
 
@@ -210,6 +277,12 @@ function updateChannelList(filteredChannels = null, page = null) {
         bulkDeleteContainer.id = 'channelBulkDeleteContainer';
         bulkDeleteContainer.style.display = 'none';
         bulkDeleteContainer.innerHTML = `
+            <button id="selectAllChannelsButton" class="btn-select-all" onclick="selectAllChannels()">
+                <i class="fa-solid fa-check-double"></i> Tüm Kanalları Seç
+            </button>
+            <button id="clearChannelSelectionsButton" class="btn-clear-selection" onclick="clearChannelSelections()">
+                <i class="fas fa-square"></i> Tüm Seçimleri Kaldır
+            </button>
             <button id="channelBulkDeleteButton" class="btn-danger" onclick="deleteSelectedChannels()">
                 <i class="fas fa-trash"></i> Seçili Kanalları Sil
             </button>
@@ -3036,6 +3109,18 @@ function addChannel() {
 }
 
 // Seçili kanalları silme fonksiyonu
+function selectAllChannels() {
+    const checkboxes = document.querySelectorAll('.channel-checkbox');
+    checkboxes.forEach(checkbox => checkbox.checked = true);
+    updateBulkDeleteContainer();
+}
+
+function clearChannelSelections() {
+    const checkboxes = document.querySelectorAll('.channel-checkbox');
+    checkboxes.forEach(checkbox => checkbox.checked = false);
+    handleCheckboxChange();
+}
+
 function deleteSelectedChannels() {
     const selectedChannels = document.querySelectorAll('.channel-checkbox:checked');
     if (selectedChannels.length === 0) return;
@@ -3710,18 +3795,6 @@ function updateGroupFilter() {
 function sortChannels(channels, sortType) {
     const channelsCopy = [...channels]; // Orijinal diziyi değiştirmemek için kopya oluştur
     switch (sortType) {
-        case 'active':
-            return channelsCopy.sort((a, b) => {
-                if (a.healthStatus === 'excellent' && b.healthStatus !== 'excellent') return -1;
-                if (a.healthStatus !== 'excellent' && b.healthStatus === 'excellent') return 1;
-                return a.tvgName.localeCompare(b.tvgName);
-            });
-        case 'inactive':
-            return channelsCopy.sort((a, b) => {
-                if (a.healthStatus === 'poor' && b.healthStatus !== 'poor') return -1;
-                if (a.healthStatus !== 'poor' && b.healthStatus === 'poor') return 1;
-                return a.tvgName.localeCompare(b.tvgName);
-            });
         case 'favorites':
             return channelsCopy.sort((a, b) => {
                 if (a.isFavorite && !b.isFavorite) return -1;
@@ -3736,11 +3809,19 @@ function sortChannels(channels, sortType) {
             return channelsCopy.sort((a, b) => {
                 const aHasLogo = a.tvgLogo && a.tvgLogo !== DEFAULT_LOGO;
                 const bHasLogo = b.tvgLogo && b.tvgLogo !== DEFAULT_LOGO;
-                // First sort by logo presence
-                if (!aHasLogo && bHasLogo) return -1; // No logo channels to top
-                if (aHasLogo && !bHasLogo) return 1; // Logo channels to bottom
-                // If both have logo or both don't have logo, sort by name
-                if ((!aHasLogo && !bHasLogo) || (aHasLogo && bHasLogo)) {
+                const aIsBroken = a.tvgLogo === BROKEN_LOGO;
+                const bIsBroken = b.tvgLogo === BROKEN_LOGO;
+                
+                // No logo channels to top
+                if (!aHasLogo && bHasLogo) return -1;
+                if (aHasLogo && !bHasLogo) return 1;
+                
+                // Broken logo channels in middle
+                if (aIsBroken && !bIsBroken) return -1;
+                if (!aIsBroken && bIsBroken) return 1;
+                
+                // If same category, sort by name
+                if ((!aHasLogo && !bHasLogo) || (aIsBroken && bIsBroken) || (aHasLogo && !aIsBroken && bHasLogo && !bIsBroken)) {
                     return a.tvgName.localeCompare(b.tvgName, 'tr');
                 }
                 return 0;

@@ -1,0 +1,90 @@
+.stream-health-indicator {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border-radius: 50%;
+    cursor: help;
+    box-shadow: 0 0 8px;
+    transition: all 0.3s ease;
+}
+
+.stream-health-indicator i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+.stream-health-indicator.pending {
+    background-color: #FFC107;
+    color: #FFA000;
+    box-shadow: 0 0 12px #FFC107;
+    animation: rotate-pulse 2s infinite;
+}
+
+.stream-health-indicator.pending i {
+    animation: rotate-pulse 2s infinite;
+}
+
+.stream-health-indicator.excellent {
+    background-color: #4CAF50;
+    color: #2E7D32;
+    box-shadow: 0 0 15px #4CAF50;
+    animation: success-pulse 3s infinite;
+}
+
+.stream-health-indicator.excellent i {
+    color: #4CAF50;
+    animation: success-pulse 3s infinite;
+}
+
+.stream-health-indicator.poor {
+    background-color: #F44336;
+    color: #C62828;
+    box-shadow: 0 0 12px #F44336;
+    animation: error-pulse 1.5s infinite;
+}
+
+.stream-health-indicator.poor i {
+    color: #F44336;
+    animation: error-pulse 1.5s infinite;
+}
+
+.stream-health-indicator.vpn_required {
+    background-color: #FFD700;
+    color: #B8860B;
+    box-shadow: 0 0 12px #FFD700;
+    animation: vpn-pulse 2s infinite;
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.stream-health-indicator.vpn_required i {
+    color: #FFD700;
+    animation: vpn-pulse 2s infinite;
+    transition: color 0.5s ease;
+}
+
+@keyframes success-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes rotate-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 12px #FFC107; }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px #FFC107; }
+    100% { transform: scale(1); box-shadow: 0 0 12px #FFC107; }
+}
+
+@keyframes error-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 12px rgba(244, 67, 54, 0.8); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(244, 67, 54, 1); }
+    100% { transform: scale(1); box-shadow: 0 0 12px rgba(244, 67, 54, 0.8); }
+}
+
+@keyframes vpn-pulse {
+    0% { transform: scale(1); opacity: 1; box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
+    50% { transform: scale(1.1); opacity: 0.9; box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+    100% { transform: scale(1); opacity: 1; box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
+}
