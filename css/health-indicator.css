@@ -13,7 +13,7 @@
 
 .stream-health-indicator i {
     margin-right: 4px;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .stream-health-indicator.pending {

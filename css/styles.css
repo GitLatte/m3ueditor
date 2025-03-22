@@ -2964,7 +2964,7 @@ select#sortFilter option[value="favorites"] {
 
 .group-card h3 {
     margin: 0;
-    font-size: 1.2em;
+    font-size: 1em;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -3547,8 +3547,8 @@ body.dark-theme .channel-group {
 }
 
 .stat-value {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 500;
     color: var(--text-color);
     line-height: 1.2;
 }
@@ -3567,9 +3567,127 @@ body.dark-theme .channel-group {
 }
 
 /* Modal stilleri */
-.edit-group-modal .modal-content,
-.delete-group-modal .modal-content {
-    max-width: 500px;
+.edit-group-modal .modal-content {
+    max-width: 800px;
+    min-height: 400px;
+}
+
+.group-channels-list {
+    margin-top: 20px;
+}
+
+.group-channels-list h4 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.group-channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 5px 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.group-channel-item:hover {
+    background: var(--hover-color);
+}
+
+.group-channel-item .channel-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.group-channel-item .channel-number {
+    font-weight: bold;
+    color: var(--text-muted);
+    min-width: 40px;
+}
+
+.group-channel-item .channel-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.group-channel-item .channel-name {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.group-channel-item .channel-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 15px;
+}
+
+.order-controls button {
+    padding: 5px 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.order-controls button:hover:not([disabled]) {
+    background: var(--hover-color);
+}
+
+.order-controls button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.order-controls .channel-order {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.group-channel-item .btn-edit,
+.group-channel-item .btn-delete {
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.group-channel-item .btn-edit:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.group-channel-item .btn-delete:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
 }
 
 .delete-options {

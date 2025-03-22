@@ -130,7 +130,7 @@ function createChannelCard(channel, index, filteredChannels = null) {
     // Yayın sağlığı göstergesi HTML'i
     const streamHealthIndicator = `
         <div class="stream-health-indicator pending" title="Yayın durumu kontrol ediliyor...">
-            <i class="fas fa-circle"></i>
+            <i class="fas fa-globe"></i>
         </div>
     `;
 
@@ -207,26 +207,29 @@ async function checkStreamHealth(url) {
         if (response.ok) {
             return {
                 status: 'excellent',
-                message: 'Yayın aktif ve erişilebilir durumda'
+                message: 'Yayın aktif ve erişilebilir durumda',
+                vpnRequired: false
             };
         }
     } catch (error) {
         // Doğrudan erişim başarısız olduğunda proxy ile dene
         try {
-            const proxyUrl = `https://vavoo.gitlatte.workers.dev/?url=${url}`;
+            const proxyUrl = `https://yayin-kontrolleri.gitlatte.workers.dev/?url=${url}`;
             const proxyResponse = await fetch(proxyUrl, { method: 'HEAD', timeout: 5000 });
             
             if (proxyResponse.ok) {
                 return {
                     status: 'poor',
-                    message: 'Yayına erişilemiyor'
+                    message: 'Yayına erişilemiyor',
+                    vpnRequired: false
                 };
             }
         } catch (proxyError) {
             // Proxy ile de erişilemedi
             return {
                 status: 'vpn_required',
-                message: 'Yayın çok geç açılıyor ya da VPN gerektiriyor'
+                message: 'Çok geç açılıyor ya da VPN gerektiriyor',
+                vpnRequired: true
             };
         }
     }
@@ -234,7 +237,8 @@ async function checkStreamHealth(url) {
     // Her iki yöntemle de erişilemediğinde
     return {
         status: 'poor',
-        message: 'Yayına erişilemiyor'
+        message: 'Yayına erişilemiyor',
+        vpnRequired: false
     };
 }
 
@@ -1739,11 +1743,20 @@ function saveChannel(index) {
         return;
     }
     
-    // Get current search term and group filter before updating
-    const searchInput = document.querySelector('.search-bar input');
-    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    const groupFilter = document.getElementById('groupFilter');
-    const selectedGroup = groupFilter ? groupFilter.value : '';
+    // Store the current group modal state
+    const groupModal = document.querySelector('.edit-group-modal');
+    const groupTitle = groupModal ? groupModal.querySelector('#newGroupTitle').value.trim() : null;
+    
+    // Store the current state before updating
+    const currentState = {
+        searchInput: document.querySelector('.search-bar input'),
+        groupFilter: document.getElementById('groupFilter'),
+        currentPage: currentPage,
+        groupModal: document.querySelector('.group-modal')
+    };
+    
+    const searchTerm = currentState.searchInput ? currentState.searchInput.value.toLowerCase().trim() : '';
+    const selectedGroup = currentState.groupFilter ? currentState.groupFilter.value : '';
 
     let notifications = [];
 
@@ -1833,32 +1846,36 @@ function saveChannel(index) {
         addNotification('Kanal Güncellemesi<br/>', notifications.join('<br/> '));
     }
 
-    // Clear search term if it exists
-    if (searchInput) {
-        searchInput.value = '';
+    // Restore the previous state
+    if (currentState.searchInput) {
+        currentState.searchInput.value = searchTerm;
         const searchIcon = document.querySelector('.search-bar i');
         if (searchIcon) {
-            updateSearchIcon(false);
+            updateSearchIcon(searchTerm !== '');
         }
     }
 
-    // Update the channel list while maintaining group filter state
+    // Update the channel list while maintaining the previous state
     if (selectedGroup && selectedGroup !== 'all') {
-        // If there's an active group filter, show only channels from that group
         const filteredChannels = channels.filter(ch => ch.groupTitle === selectedGroup);
-        updateChannelList(filteredChannels, currentPage);
-        // Update group filter to maintain group view state
-        if (groupFilter) {
-            groupFilter.value = selectedGroup;
+        updateChannelList(filteredChannels, currentState.currentPage);
+        if (currentState.groupFilter) {
+            currentState.groupFilter.value = selectedGroup;
         }
     } else {
-        // If no filter is active, show all channels
-        updateChannelList(null, currentPage);
+        updateChannelList(null, currentState.currentPage);
     }
     
     updateUnsavedChanges(true);
     updateCounts();
+
+    // Close the channel edit modal first
     closeModal();
+
+    // If group modal was open, update its content
+    if (groupTitle) {
+        updateGroupModalContent(groupTitle);
+    }
 }
 
 // Kanal silme
@@ -4399,9 +4416,143 @@ function updateCounts() {
     }
 }
 
+// Grup içinde kanal sırasını değiştirme fonksiyonu
+function moveChannelInGroup(channelIndex, direction, groupTitle) {
+    const groupChannels = channels.filter(ch => ch.groupTitle === groupTitle);
+    const currentIndex = groupChannels.findIndex(ch => channels.indexOf(ch) === channelIndex);
+    
+    if (currentIndex === -1) return;
+    
+    let newIndex;
+    if (direction === 'up' && currentIndex > 0) {
+        newIndex = currentIndex - 1;
+    } else if (direction === 'down' && currentIndex < groupChannels.length - 1) {
+        newIndex = currentIndex + 1;
+    } else {
+        return;
+    }
+    
+    // Swap channels in the main array
+    const globalIndex1 = channels.indexOf(groupChannels[currentIndex]);
+    const globalIndex2 = channels.indexOf(groupChannels[newIndex]);
+    
+    [channels[globalIndex1], channels[globalIndex2]] = [channels[globalIndex2], channels[globalIndex1]];
+    
+    // Sadece grup modalını güncelle, ana ekranı güncelleme
+    updateGroupModalContent(groupTitle);
+}
+
+// Kanal sırasını direkt değiştirme fonksiyonu
+function setChannelOrder(channelIndex, newOrder, groupTitle) {
+    const groupChannels = channels.filter(ch => ch.groupTitle === groupTitle);
+    const currentGroupIndex = groupChannels.findIndex(ch => channels.indexOf(ch) === channelIndex);
+    const targetGroupIndex = newOrder - 1;
+    
+    if (targetGroupIndex >= 0 && targetGroupIndex < groupChannels.length) {
+        const targetIndex = channels.indexOf(groupChannels[targetGroupIndex]);
+        changeChannelOrder(channelIndex, targetIndex);
+    }
+    
+    // Modal içeriğini güncelle
+    updateGroupModalContent(groupTitle);
+}
+
+// Grup düzenleme modalının içeriğini güncelleme fonksiyonu
+function updateGroupModalContent(groupTitle) {
+    if (!currentGroupModal) return;
+    
+    const groupChannels = channels.filter(ch => ch.groupTitle === groupTitle);
+    const channelsList = currentGroupModal.querySelector('.group-channels-list');
+    
+    if (channelsList) {
+        channelsList.innerHTML = `
+            <h4>Grup Kanalları (${groupChannels.length})</h4>
+            ${groupChannels.map((channel, index) => `
+                <div class="group-channel-item" data-channel-index="${channels.indexOf(channel)}">
+                    <div class="channel-info">
+                        <span class="channel-number">#${index + 1}</span>
+                        <img src="${channel.tvgLogo || 'images/default-channel.png'}" 
+                             alt="${channel.tvgName}" 
+                             class="channel-logo"
+                             onerror="this.src='images/default-channel.png'">
+                        <span class="channel-name">${channel.tvgName}</span>
+                    </div>
+                    <div class="channel-actions">
+                        <div class="order-controls">
+                            <button class="btn-move-up" ${index === 0 ? 'disabled' : ''}
+                                    onclick="moveChannelInGroup(${channels.indexOf(channel)}, 'up', '${groupTitle}')">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <input type="number" class="channel-order" 
+                                   value="${index + 1}" 
+                                   min="1" 
+                                   max="${groupChannels.length}"
+                                   onchange="setChannelOrder(${channels.indexOf(channel)}, this.value, '${groupTitle}')">
+                            <button class="btn-move-down" ${index === groupChannels.length - 1 ? 'disabled' : ''}
+                                    onclick="moveChannelInGroup(${channels.indexOf(channel)}, 'down', '${groupTitle}')">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
+                        <button class="btn-edit" onclick="editChannelInGroup(${channels.indexOf(channel)}, '${groupTitle}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteChannelInGroup(${channels.indexOf(channel)}, '${groupTitle}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+    }
+}
+
+
+let currentGroupModal = null;
+
+// Grup içindeki kanalı düzenleme fonksiyonu
+function editChannelInGroup(channelIndex, groupTitle) {
+    editChannel(channelIndex);
+    
+    // Kanal düzenleme modalı kapandığında grup modalını güncelle
+    const channelModal = document.querySelector('.channel-modal');
+    if (channelModal) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList' && !document.contains(channelModal)) {
+                    updateGroupModalContent(groupTitle);
+                    observer.disconnect();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { childList: true });
+    }
+}
+
+// Grup içindeki kanalı silme fonksiyonu
+function deleteChannelInGroup(channelIndex, groupTitle) {
+    const confirmDelete = confirm('Bu kanalı silmek istediğinize emin misiniz?');
+    if (confirmDelete) {
+        channels.splice(channelIndex, 1);
+        showNotification('Kanal başarıyla silindi.', 'success');
+        addNotification('Kanal Silme', 'Kanal başarıyla silindi.');
+        updateGroupModalContent(groupTitle);
+        updateChannelList();
+    }
+}
+
 function editGroup(groupTitle) {
+    // Eğer mevcut bir modal varsa kaldır
+    if (currentGroupModal) {
+        currentGroupModal.remove();
+    }
+
     const modal = document.createElement('div');
     modal.className = 'modal edit-group-modal';
+    currentGroupModal = modal;
+    
+    // Grup kanallarını filtrele ve sırala
+    const groupChannels = channels.filter(ch => ch.groupTitle === groupTitle);
     
     modal.innerHTML = `
         <div class="modal-content">
@@ -4413,6 +4564,44 @@ function editGroup(groupTitle) {
                 <div class="form-group">
                     <label>Grup Adı:</label>
                     <input type="text" id="newGroupTitle" value="${groupTitle}" class="form-control">
+                </div>
+                <div class="group-channels-list">
+                    <h4>Grup Kanalları (${groupChannels.length})</h4>
+                    ${groupChannels.map((channel, index) => `
+                        <div class="group-channel-item" data-channel-index="${channels.indexOf(channel)}">
+                            <div class="channel-info">
+                                <span class="channel-number">#${index + 1}</span>
+                                <img src="${channel.tvgLogo || 'images/default-channel.png'}" 
+                                     alt="${channel.tvgName}" 
+                                     class="channel-logo"
+                                     onerror="this.src='images/default-channel.png'">
+                                <span class="channel-name">${channel.tvgName}</span>
+                            </div>
+                            <div class="channel-actions">
+                                <div class="order-controls">
+                                    <button class="btn-move-up" ${index === 0 ? 'disabled' : ''}
+                                            onclick="moveChannelInGroup(${channels.indexOf(channel)}, 'up', '${groupTitle}')">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                    <input type="number" class="channel-order" 
+                                           value="${index + 1}" 
+                                           min="1" 
+                                           max="${groupChannels.length}"
+                                           onchange="setChannelOrder(${channels.indexOf(channel)}, this.value, '${groupTitle}')">
+                                    <button class="btn-move-down" ${index === groupChannels.length - 1 ? 'disabled' : ''}
+                                            onclick="moveChannelInGroup(${channels.indexOf(channel)}, 'down', '${groupTitle}')">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </button>
+                                </div>
+                                <button class="btn-edit" onclick="editChannelInGroup(${channels.indexOf(channel)}, '${groupTitle}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" onclick="deleteChannelInGroup(${channels.indexOf(channel)}, '${groupTitle}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
             <div class="modal-footer">
@@ -4429,11 +4618,21 @@ function editGroup(groupTitle) {
     const cancelBtn = modal.querySelector('.btn-cancel');
     const saveBtn = modal.querySelector('.btn-save');
     
+    closeBtn.onclick = () => {
+        modal.remove();
+        currentGroupModal = null;
+    };
     
-    closeBtn.onclick = () => modal.remove();
-    cancelBtn.onclick = () => modal.remove();
+    cancelBtn.onclick = () => {
+        modal.remove();
+        currentGroupModal = null;
+    };
+    
     modal.onclick = e => {
-        if (e.target === modal) modal.remove();
+        if (e.target === modal) {
+            modal.remove();
+            currentGroupModal = null;
+        }
     };
     
     saveBtn.onclick = () => {
@@ -4447,8 +4646,10 @@ function editGroup(groupTitle) {
             showNotification(`${groupTitle} grubu ${newTitle} olarak değiştirildi.`, 'success');
             addNotification('Kanal Grubu Düzenleme', `${groupTitle} grubu ${newTitle} olarak değiştirildi.`);
             listChannelGroups(); // Kanal grupları listesini güncelle
+            updateChannelList(); // Kanal listesini güncelle
         }
         modal.remove();
+        currentGroupModal = null;
     };
 }
 
