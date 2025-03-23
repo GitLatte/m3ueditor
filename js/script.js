@@ -14,9 +14,9 @@ function toggleTheme() {
 }
 
 // Logo URL'lerini tanımla
-const DEFAULT_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png';  // Varsayılan logo
-const BROKEN_LOGO = 'https://gitlatte.github.io/m3ueditor/images/broken-image.svg';     // Hatalı logo
-const FALLBACK_LOGO = 'https://gitlatte.github.io/m3ueditor/images/default-channel.png'; // Kaydetme için
+const DEFAULT_LOGO = 'https://raw.githubusercontent.com/GitLatte/m3ueditor/refs/heads/site/images/default-channel.png';  // Varsayılan logo
+const BROKEN_LOGO = 'https://raw.githubusercontent.com/GitLatte/m3ueditor/refs/heads/site/images/broken-image.svg';     // Hatalı logo
+const FALLBACK_LOGO = 'https://raw.githubusercontent.com/GitLatte/m3ueditor/refs/heads/site/images/default-channel.png'; // Kaydetme için
 
 // Hazır User Agent listesi
 const PREDEFINED_USER_AGENTS = {
@@ -1623,9 +1623,9 @@ window.findMatchingLogos = function(channelName) {
                     <div class="logo-grid">
                         ${matchingLogos.map(logo => `
                             <div class="logo-option">
-                                <img src="https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}" 
+                                <img src="https://raw.githubusercontent.com/GitLatte/m3ueditor/refs/heads/site/images/kanal-gorselleri/turkiye/${logo}" 
                                      alt="${logo}"
-                                     onclick="selectLogo('https://gitlatte.github.io/m3ueditor/images/kanal-gorselleri/turkiye/${logo}')"
+                                     onclick="selectLogo('https://raw.githubusercontent.com/GitLatte/m3ueditor/refs/heads/site/images/kanal-gorselleri/turkiye/${logo}')"
                                      onerror="this.src='${DEFAULT_LOGO}'">
                             </div>
                         `).join('')}
